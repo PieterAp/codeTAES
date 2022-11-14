@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
@@ -25,11 +27,20 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var registerTextView: TextView
     private lateinit var textInputLayoutEmail: TextInputLayout
     private lateinit var textInputLayoutPassword: TextInputLayout
+    private lateinit var logo : ImageView
     var requestQueue: RequestQueue? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        // deactivate dark mode
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
+        //set logo in imageView
+        logo = findViewById(R.id.imageView)
+        logo.setImageResource(R.drawable.fastuga_logo);
+
         requestQueue = Volley.newRequestQueue(this)
 
         emailEditText = findViewById(R.id.editTextEmail)
