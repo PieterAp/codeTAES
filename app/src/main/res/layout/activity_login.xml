@@ -75,6 +75,14 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <TextView
+                    android:id="@+id/textLoginError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:textColor="#F44336"
+                    android:visibility="gone" />
+
                 <CheckBox
                     android:id="@+id/checkBoxRemember"
                     android:layout_width="wrap_content"

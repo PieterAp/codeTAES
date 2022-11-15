@@ -1,12 +1,11 @@
 package com.example.fastuga
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.view.View
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.android.volley.Request
@@ -15,6 +14,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONObject
+
 
 class LoginActivity : AppCompatActivity() {
 
@@ -25,14 +25,29 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var rememberCheckBox: CheckBox
     private lateinit var loginButton: Button
     private lateinit var registerTextView: TextView
+    private lateinit var loginErrorTextView: TextView
     private lateinit var textInputLayoutEmail: TextInputLayout
     private lateinit var textInputLayoutPassword: TextInputLayout
-    private lateinit var logo : ImageView
+    private lateinit var logo: ImageView
     var requestQueue: RequestQueue? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        val myPrefs = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+        val token = myPrefs.getString("token","")
+        if (token?.isNotEmpty() == true) {
+            //already login
+            val intent = Intent(applicationContext, DashBoard::class.java)
+            startActivity(intent)
+        }
+
+        //CREATES EncryptedSharedPreferences
+        //Probably move this part to were it is only create once per app
+        // --------------------------------------------
+
+        // --------------------------------------------
 
         // deactivate dark mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -43,6 +58,7 @@ class LoginActivity : AppCompatActivity() {
 
         requestQueue = Volley.newRequestQueue(this)
 
+        loginErrorTextView = findViewById(R.id.textLoginError)
         emailEditText = findViewById(R.id.editTextEmail)
         passwordEditText = findViewById(R.id.editTextPassword)
         rememberCheckBox = findViewById(R.id.checkBoxRemember)
@@ -83,6 +99,7 @@ class LoginActivity : AppCompatActivity() {
 
     //LOGIN OBJECT TESTE
     private fun loginUser() {
+        loginErrorTextView.visibility = View.GONE
         val email: String = emailEditText.getText().toString().trim()
         val password: String = passwordEditText.getText().toString().trim()
         val url = "http://10.0.2.2/api/auth/login"
@@ -91,29 +108,36 @@ class LoginActivity : AppCompatActivity() {
         obj.put("email", email)
         obj.put("password", password)
         if (rememberCheckBox.isChecked) {
-            obj.put("remeber", rememberCheckBox.isChecked)
+            obj.put("remember", rememberCheckBox.isChecked)
         }
 
         val jsObjRequest = JsonObjectRequest(
             Request.Method.POST, url, obj,
             { response ->
                 //verify if remember was checked
-                //obj.get("remember")
-                //get remember token and save to shared preferences
+                if (rememberCheckBox.isChecked) {
+                    val sharedpreferences = applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE) // 0 - for private mode
+                    val editor: SharedPreferences.Editor = sharedpreferences.edit()
+                    //get auth token and save to shared preferences
+                    val token = response.getString("token")
+                    editor.putString("token", token)
+                    editor.apply();
+                }
                 //go to dashboard
-                startActivity(Intent(this, DashBoard::class.java))
+                val intent = Intent(applicationContext, DashBoard::class.java)
+                startActivity(intent)
             }
         ) { error ->
             val networkResponse = error.networkResponse
             if (networkResponse?.data != null) {
-                //EXEMPLE ON HOW TO GET ERRO MESSAGES
-                /*
+                loginErrorTextView.visibility = View.VISIBLE
                 val jsonError = String(networkResponse.data)
                 val json = JSONObject(jsonError)
                 var message = json.get("message")
-                Log.w("@", message.toString())
-                Log.w("@", error.networkResponse.statusCode.toString())
-                */
+                loginErrorTextView.text = message.toString()
+                //Log.w("@", message.toString())
+                //Log.w("@", error.networkResponse.statusCode.toString())
+
             }
         }
         requestQueue?.add(jsObjRequest)
