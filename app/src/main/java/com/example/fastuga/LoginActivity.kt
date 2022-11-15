@@ -47,12 +47,6 @@ class LoginActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        //CREATES EncryptedSharedPreferences
-        //Probably move this part to were it is only create once per app
-        // --------------------------------------------
-
-        // --------------------------------------------
-
         // deactivate dark mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
