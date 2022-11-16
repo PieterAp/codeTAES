@@ -11,8 +11,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.android.volley.Request
-import com.android.volley.RequestQueue
+import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.textfield.TextInputLayout
@@ -21,18 +20,16 @@ import org.json.JSONObject
 
 class LoginActivity : AppCompatActivity() {
 
-    //TODO FIX ERRORS/WARNINGS WITH LAYOUT AND (HONESTLY MAKE A DECENT DESIGN)
-
     private lateinit var emailEditText: EditText
     private lateinit var passwordEditText: EditText
     private lateinit var rememberCheckBox: CheckBox
-    private lateinit var loginButton: Button
     private lateinit var registerTextView: TextView
     private lateinit var loginErrorTextView: TextView
     private lateinit var textInputLayoutEmail: TextInputLayout
     private lateinit var textInputLayoutPassword: TextInputLayout
     private lateinit var logo: ImageView
-    var requestQueue: RequestQueue? = null
+    private lateinit var progressBar: ProgressBar
+    private lateinit var requestQueue: RequestQueue
 
     override fun onCreate(savedInstanceState: Bundle?) {
         hideSystemBars()
@@ -40,7 +37,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         val myPrefs = getSharedPreferences("MyPrefs", MODE_PRIVATE)
-        val token = myPrefs.getString("token","")
+        val token = myPrefs.getString("token", "")
         if (token?.isNotEmpty() == true) {
             //already login
             val intent = Intent(applicationContext, DashBoard::class.java)
@@ -60,46 +57,25 @@ class LoginActivity : AppCompatActivity() {
         emailEditText = findViewById(R.id.editTextEmail)
         passwordEditText = findViewById(R.id.editTextPassword)
         rememberCheckBox = findViewById(R.id.checkBoxRemember)
-        loginButton = findViewById(R.id.btnLogin)
         registerTextView = findViewById(R.id.registerLink)
         textInputLayoutEmail = findViewById(R.id.textInputLayoutEmail)
         textInputLayoutPassword = findViewById(R.id.textInputLayoutPassword)
+        progressBar = findViewById(R.id.progressBar);
 
-        loginButton.setOnClickListener {
+
+        val loginButton = findViewById<View>(R.id.btnLogin) as Button
+
+        loginButton.setOnClickListener(View.OnClickListener {
             if (validateData()) {
                 loginUser()
             }
-        }
-
-    }
-
-    //GET ARRAY TESTE
-    /*
-    private fun getArrayRequest() {
-        val url = "http://10.0.2.2/api/users"
-        val request = JsonArrayRequest(Request.Method.GET, url, null, { response ->
-            try {
-                for (i in 0 until response.length()) {
-                   var email = response.getJSONObject(i).get("email")
-                    Log.w("@", email.toString())
-                }
-            } catch (error: JSONException) {
-                Log.w("@", error.message.toString())
-            }
-        }, { error ->
-            //error.printStackTrace()
-            Log.w("@", error.message.toString())
-            Log.w("@", error.networkResponse.statusCode.toString())
         })
-        requestQueue?.add(request)
     }
-    */
 
-    //LOGIN OBJECT TESTE
     private fun loginUser() {
         loginErrorTextView.visibility = View.GONE
-        val email: String = emailEditText.getText().toString().trim()
-        val password: String = passwordEditText.getText().toString().trim()
+        val email: String = emailEditText.text.toString().trim()
+        val password: String = passwordEditText.text.toString().trim()
         val url = "http://10.0.2.2/api/auth/login"
 
         val obj = JSONObject()
@@ -109,12 +85,14 @@ class LoginActivity : AppCompatActivity() {
             obj.put("remember", rememberCheckBox.isChecked)
         }
 
+        progressBar.visibility = View.VISIBLE
         val jsObjRequest = JsonObjectRequest(
             Request.Method.POST, url, obj,
             { response ->
                 //verify if remember was checked
                 if (rememberCheckBox.isChecked) {
-                    val sharedpreferences = applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE) // 0 - for private mode
+                    val sharedpreferences =
+                        applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
                     val editor: SharedPreferences.Editor = sharedpreferences.edit()
                     //get auth token and save to shared preferences
                     val token = response.getString("token")
@@ -124,21 +102,20 @@ class LoginActivity : AppCompatActivity() {
                 //go to dashboard
                 val intent = Intent(applicationContext, DashBoard::class.java)
                 startActivity(intent)
-            }
-        ) { error ->
+            }) { error ->
             val networkResponse = error.networkResponse
             if (networkResponse?.data != null) {
                 loginErrorTextView.visibility = View.VISIBLE
-                val jsonError = String(networkResponse.data)
-                val json = JSONObject(jsonError)
-                var message = json.get("message")
-                loginErrorTextView.text = message.toString()
-                //Log.w("@", message.toString())
-                //Log.w("@", error.networkResponse.statusCode.toString())
-
+                loginErrorTextView.text = "Login failed. Wrong credentials"
+                progressBar.visibility = View.GONE
             }
         }
-        requestQueue?.add(jsObjRequest)
+        jsObjRequest.retryPolicy = DefaultRetryPolicy(
+            30000,
+            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
+        requestQueue.add(jsObjRequest)
     }
 
     private fun validateData(): Boolean {
@@ -194,6 +171,5 @@ class LoginActivity : AppCompatActivity() {
         // Hide both the status bar and the navigation bar
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     }
-
 
 }

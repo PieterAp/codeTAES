@@ -10,8 +10,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="match_parent">
         <!--
         android:fillViewport="true"
         -->
@@ -28,7 +27,7 @@
                 android:layout_height="250dp"
                 android:layout_gravity="center"
                 android:adjustViewBounds="true"
-                tools:src="@drawable/fastuga_logo"/>
+                tools:src="@drawable/fastuga_logo" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -93,6 +92,13 @@
                     android:layout_height="wrap_content"
                     android:text="@string/remember" />
 
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
+
 
                 <Button
                     android:id="@+id/btnLogin"
@@ -100,22 +106,19 @@
                     android:layout_height="wrap_content"
                     android:text="@string/login" />
 
-
                 <TextView
                     android:id="@+id/registerLink"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center"
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="100dp"
-                    android:layout_gravity="bottom|center"
                     android:text="@string/register" />
 
             </LinearLayout>
 
-
         </LinearLayout>
 
     </ScrollView>
-
 
 </LinearLayout>
