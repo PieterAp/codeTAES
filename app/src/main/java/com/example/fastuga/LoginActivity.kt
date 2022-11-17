@@ -37,8 +37,8 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         val myPrefs = getSharedPreferences("MyPrefs", MODE_PRIVATE)
-        val token = myPrefs.getString("token", "")
-        if (token?.isNotEmpty() == true) {
+        val accessToken = myPrefs.getString("access_token", "")
+        if (accessToken?.isNotEmpty() == true) {
             //already login
             val intent = Intent(applicationContext, DashBoard::class.java)
             startActivity(intent)
@@ -94,9 +94,9 @@ class LoginActivity : AppCompatActivity() {
                     val sharedpreferences =
                         applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
                     val editor: SharedPreferences.Editor = sharedpreferences.edit()
-                    //get auth token and save to shared preferences
-                    val token = response.getString("token")
-                    editor.putString("token", token)
+                    //get auth access_token and save to shared preferences
+                    val accessToken = response.getString("access_token")
+                    editor.putString("access_token", accessToken)
                     editor.apply();
                 }
                 //go to dashboard
