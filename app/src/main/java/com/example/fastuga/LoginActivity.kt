@@ -70,6 +70,14 @@ class LoginActivity : AppCompatActivity() {
                 loginUser()
             }
         })
+
+
+        val registerLink = findViewById<View>(R.id.registerLink) as TextView
+        registerLink.setOnClickListener(View.OnClickListener{
+            val intent = Intent(applicationContext, RegisterActivity::class.java)
+            startActivity(intent)
+        })
+
     }
 
     private fun loginUser() {
