@@ -127,6 +127,9 @@ class RegisterActivity : AppCompatActivity() {
 
 
         val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        val phoneNumberPattern = "^[+]?[0-9]{9,13}\$"
+        val namePattern = "^[A-z][\\sA-z]*\$"
+        val licencePlatePattern = "(^(?:[A-Z]{2}-\\d{2}-\\d{2})|(?:\\d{2}-[A-Z]{2}-\\d{2})|(?:\\d{2}-\\d{2}-[A-Z]{2})|(?:[A-Z]{2}-\\d{2}-[A-Z]{2})\$)"
 
         var validation = true
 
@@ -136,8 +139,20 @@ class RegisterActivity : AppCompatActivity() {
             validation = false
         }
 
+        if (!nameEditText.text.matches(namePattern.toRegex()) ){
+            textInputLayoutName.error = "Name is invalid"
+            textInputLayoutName.isErrorEnabled = true
+            validation = false
+        }
+
         if (phoneNumberEditText.length() == 0){
             textInputLayoutPhoneNumber.error = "Phone Number is required"
+            textInputLayoutPhoneNumber.isErrorEnabled = true
+            validation = false
+        }
+
+        if (!phoneNumberEditText.text.matches(phoneNumberPattern.toRegex())){
+            textInputLayoutPhoneNumber.error = "Phone Number is invalid"
             textInputLayoutPhoneNumber.isErrorEnabled = true
             validation = false
         }
@@ -164,6 +179,13 @@ class RegisterActivity : AppCompatActivity() {
             validation = false
         }
 
+        if (passwordEditText.length() < 3) {
+            //CHANGE ERROR PLACE FOR A MORE VISIBLE PLACE
+            textInputLayoutPassword.error = "Password is invalid"
+            textInputLayoutPassword.isErrorEnabled = true
+            validation = false
+        }
+
         if (confirmPasswordEditText.text.toString() != passwordEditText.text.toString()){
             textInputLayoutConfirmPassword.error = "Passwords do not match"
             textInputLayoutConfirmPassword.isErrorEnabled = true
@@ -176,11 +198,25 @@ class RegisterActivity : AppCompatActivity() {
             validation = false
         }
 
+        if (confirmPasswordEditText.length() < 3) {
+            //CHANGE ERROR PLACE FOR A MORE VISIBLE PLACE
+            textInputLayoutPassword.error = "Confirm Password is invalid"
+            textInputLayoutPassword.isErrorEnabled = true
+            validation = false
+        }
+
         if (licensePlateEditText.length() == 0){
             textInputLayoutLicensePlate.error = "License Plate is required"
             textInputLayoutLicensePlate.isErrorEnabled = true
             validation = false
         }
+
+        if (!licensePlateEditText.text.matches(licencePlatePattern.toRegex())){
+            textInputLayoutLicensePlate.error = "License Plate is invalid"
+            textInputLayoutLicensePlate.isErrorEnabled = true
+            validation = false
+        }
+
         return validation
 
     }
