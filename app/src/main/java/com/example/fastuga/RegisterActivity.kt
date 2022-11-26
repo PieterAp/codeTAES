@@ -206,7 +206,7 @@ class RegisterActivity : AppCompatActivity() {
             textInputLayoutConfirmPassword.isErrorEnabled = true
             validation = false
         }
-        
+
         if (!licensePlateEditText.text.matches(licencePlatePattern.toRegex())){
             textInputLayoutLicensePlate.error = "License Plate is invalid"
             textInputLayoutLicensePlate.isErrorEnabled = true
