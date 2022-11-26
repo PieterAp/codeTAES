@@ -133,26 +133,28 @@ class RegisterActivity : AppCompatActivity() {
 
         var validation = true
 
-        if (nameEditText.length() == 0){
-            textInputLayoutName.error = "Name is required"
-            textInputLayoutName.isErrorEnabled = true
-            validation = false
-        }
-
         if (!nameEditText.text.matches(namePattern.toRegex()) ){
             textInputLayoutName.error = "Name is invalid"
             textInputLayoutName.isErrorEnabled = true
             validation = false
         }
 
-        if (phoneNumberEditText.length() == 0){
-            textInputLayoutPhoneNumber.error = "Phone Number is required"
+        if (nameEditText.length() == 0){
+            textInputLayoutName.error = "Name is required"
+            textInputLayoutName.isErrorEnabled = true
+            validation = false
+        }
+
+
+        if (!phoneNumberEditText.text.matches(phoneNumberPattern.toRegex())){
+            textInputLayoutPhoneNumber.error = "Phone Number is invalid"
             textInputLayoutPhoneNumber.isErrorEnabled = true
             validation = false
         }
 
-        if (!phoneNumberEditText.text.matches(phoneNumberPattern.toRegex())){
-            textInputLayoutPhoneNumber.error = "Phone Number is invalid"
+
+        if (phoneNumberEditText.length() == 0){
+            textInputLayoutPhoneNumber.error = "Phone Number is required"
             textInputLayoutPhoneNumber.isErrorEnabled = true
             validation = false
         }
@@ -171,17 +173,17 @@ class RegisterActivity : AppCompatActivity() {
             validation = false
         }
 
-        //DECIDE WHAT IS NOT ACCEPTABLE FOR A PASSWORD
-        if (passwordEditText.length() == 0) {
+        if (passwordEditText.length() < 3) {
             //CHANGE ERROR PLACE FOR A MORE VISIBLE PLACE
-            textInputLayoutPassword.error = "Password is required"
+            textInputLayoutPassword.error = "Password is invalid"
             textInputLayoutPassword.isErrorEnabled = true
             validation = false
         }
 
-        if (passwordEditText.length() < 3) {
+        //DECIDE WHAT IS NOT ACCEPTABLE FOR A PASSWORD
+        if (passwordEditText.length() == 0) {
             //CHANGE ERROR PLACE FOR A MORE VISIBLE PLACE
-            textInputLayoutPassword.error = "Password is invalid"
+            textInputLayoutPassword.error = "Password is required"
             textInputLayoutPassword.isErrorEnabled = true
             validation = false
         }
@@ -192,16 +194,22 @@ class RegisterActivity : AppCompatActivity() {
             validation = false
         }
 
+        if (confirmPasswordEditText.length() < 3) {
+            //CHANGE ERROR PLACE FOR A MORE VISIBLE PLACE
+            textInputLayoutConfirmPassword.error = "Confirm Password is invalid"
+            textInputLayoutConfirmPassword.isErrorEnabled = true
+            validation = false
+        }
+
         if (confirmPasswordEditText.length() == 0){
             textInputLayoutConfirmPassword.error = "Confirm Password is required"
             textInputLayoutConfirmPassword.isErrorEnabled = true
             validation = false
         }
-
-        if (confirmPasswordEditText.length() < 3) {
-            //CHANGE ERROR PLACE FOR A MORE VISIBLE PLACE
-            textInputLayoutPassword.error = "Confirm Password is invalid"
-            textInputLayoutPassword.isErrorEnabled = true
+        
+        if (!licensePlateEditText.text.matches(licencePlatePattern.toRegex())){
+            textInputLayoutLicensePlate.error = "License Plate is invalid"
+            textInputLayoutLicensePlate.isErrorEnabled = true
             validation = false
         }
 
@@ -211,13 +219,6 @@ class RegisterActivity : AppCompatActivity() {
             validation = false
         }
 
-        if (!licensePlateEditText.text.matches(licencePlatePattern.toRegex())){
-            textInputLayoutLicensePlate.error = "License Plate is invalid"
-            textInputLayoutLicensePlate.isErrorEnabled = true
-            validation = false
-        }
-
         return validation
-
     }
 }
