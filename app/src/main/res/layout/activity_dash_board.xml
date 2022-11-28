@@ -60,16 +60,4 @@
         </LinearLayout>
     </com.google.android.material.navigation.NavigationView>
 
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="DashBoard"
-        android:textAlignment="center"
-        android:textSize="24dp"
-        tools:layout_editor_absoluteX="198dp"
-        tools:layout_editor_absoluteY="338dp" />
-
 </androidx.drawerlayout.widget.DrawerLayout>
