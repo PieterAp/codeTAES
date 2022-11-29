@@ -85,7 +85,7 @@ class RegisterActivity : AppCompatActivity() {
 
         val obj = JSONObject()
         obj.put("email", email)
-        obj.put("phoneNumber",phoneNumber)
+        obj.put("phone",phoneNumber)
         obj.put("password", password)
         obj.put("password_confirmation", password_confirmation)
         obj.put("name", name)
