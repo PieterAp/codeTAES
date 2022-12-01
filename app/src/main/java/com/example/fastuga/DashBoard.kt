@@ -6,21 +6,17 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import org.json.JSONObject
-import java.util.Objects
+
 
 class DashBoard : AppCompatActivity() {
     private lateinit var requestQueue: RequestQueue
@@ -55,27 +51,41 @@ class DashBoard : AppCompatActivity() {
 
     private fun logoutUser() {
         val url = "http://10.0.2.2/api/auth/logout"
+        var accessToken = "";
 
         //retrieve token from shared preferences
-        val sharedpreferences = applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-        val accessToken = sharedpreferences.getString("access_token", "DEFAULT")
+        val sharedpreferences =
+            applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+        if (intent.hasExtra("access_token")) {
+            accessToken = intent.getStringExtra("access_token")!!
+        } else {
+            accessToken = sharedpreferences.getString("access_token", "DEFAULT")!!
+        }
 
         val stringRequest = object : StringRequest(
             Method.POST, url,
             Response.Listener
             { response ->
                 //remove token from shared preferences
-                val editor: SharedPreferences.Editor = sharedpreferences.edit()
-                editor.clear()
-                editor.remove("access_token")
-                editor.apply();
+                if (intent.hasExtra("access_token")) {
+                    //go to login
+                    val intent = Intent(applicationContext, LoginActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    val editor: SharedPreferences.Editor = sharedpreferences.edit()
+                    editor.clear()
+                    editor.remove("access_token")
+                    editor.apply();
 
-                //go to login
-                val intent = Intent(applicationContext, LoginActivity::class.java)
-                startActivity(intent)
-
-            }, Response.ErrorListener { error -> error.networkResponse })
-        {
+                    val intent = Intent(applicationContext, LoginActivity::class.java)
+                    startActivity(intent)
+                }
+            },
+            Response.ErrorListener
+            { error ->
+                error.networkResponse
+            }) {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 headers["Authorization"] = "Bearer $accessToken"

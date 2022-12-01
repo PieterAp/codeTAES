@@ -73,7 +73,7 @@ class LoginActivity : AppCompatActivity() {
 
 
         val registerLink = findViewById<View>(R.id.registerLink) as TextView
-        registerLink.setOnClickListener(View.OnClickListener{
+        registerLink.setOnClickListener(View.OnClickListener {
             val intent = Intent(applicationContext, RegisterActivity::class.java)
             startActivity(intent)
         })
@@ -98,18 +98,22 @@ class LoginActivity : AppCompatActivity() {
             Request.Method.POST, url, obj,
             { response ->
                 //verify if remember was checked
+                val accessToken = response.getString("access_token")
                 if (rememberCheckBox.isChecked) {
                     val sharedpreferences =
                         applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
                     val editor: SharedPreferences.Editor = sharedpreferences.edit()
                     //get auth access_token and save to shared preferences
-                    val accessToken = response.getString("access_token")
                     editor.putString("access_token", accessToken)
                     editor.apply();
+                    //go to dashboard
+                    val intent = Intent(applicationContext, DashBoard::class.java)
+                    startActivity(intent)
+                } else {
+                    val intent = Intent(baseContext, DashBoard::class.java)
+                    intent.putExtra("access_token", accessToken)
+                    startActivity(intent)
                 }
-                //go to dashboard
-                val intent = Intent(applicationContext, DashBoard::class.java)
-                startActivity(intent)
             }) { error ->
             val networkResponse = error.networkResponse
             if (networkResponse?.data != null) {
