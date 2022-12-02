@@ -4,8 +4,12 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
-        <item android:title="Active orders" />
-        <item android:title="All orders" />
+        <item
+            android:id="@+id/orderListOrders"
+            android:title="All orders" />
+        <item
+            android:id="@+id/activeOrder"
+            android:title="Active orders" />
     </group>
 
 
