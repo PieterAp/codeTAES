@@ -285,7 +285,7 @@ class OrderDetailsFragment : Fragment() {
 
         if (road.mLength != 0.0) {
             map.setScrollableAreaLimitDouble(road.mBoundingBox)
-            map.zoomToBoundingBox(road.mBoundingBox, true, 130)
+            map.zoomToBoundingBox(road.mBoundingBox, true, 275)
             map.controller.zoomOut()
         } else {
             val center = GeoPoint(startPoint.latitude, startPoint.longitude)
