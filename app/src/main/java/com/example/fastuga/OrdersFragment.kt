@@ -47,12 +47,12 @@ class OrdersFragment : Fragment() {
         requestQueue = Volley.newRequestQueue(context)
         var accessToken: String
 
-        val sharedpreferences =
+        val sharedPreferences =
             context?.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
-        accessToken = sharedpreferences!!.getString("access_token_rm", "DEFAULT")!!
+        accessToken = sharedPreferences!!.getString("access_token_rm", "DEFAULT")!!
         if (accessToken == "DEFAULT") {
-            accessToken = sharedpreferences.getString("access_token", "DEFAULT")!!
+            accessToken = sharedPreferences.getString("access_token", "DEFAULT")!!
         }
 
         val jsonObjectRequest: StringRequest =

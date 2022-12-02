@@ -89,21 +89,21 @@ class DashBoard : AppCompatActivity() {
         var accessToken: String
 
         //retrieve token from shared preferences
-        val sharedpreferences =
+        val sharedPreferences =
             applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
-        accessToken = sharedpreferences.getString("access_token_rm", "DEFAULT")!!
-        if (accessToken=="DEFAULT") {
-            accessToken = sharedpreferences.getString("access_token", "DEFAULT")!!
+        accessToken = sharedPreferences.getString("access_token_rm", "DEFAULT")!!
+        if (accessToken == "DEFAULT") {
+            accessToken = sharedPreferences.getString("access_token", "DEFAULT")!!
         }
 
         val stringRequest = object : StringRequest(
             Method.POST, url,
             Response.Listener
-            { response ->
+            {
                 //remove token from shared preferences
-                if (sharedpreferences.getString("access_token_rm", "DEFAULT")=="DEFAULT") {
-                    val editor: SharedPreferences.Editor = sharedpreferences.edit()
+                if (sharedPreferences.getString("access_token_rm", "DEFAULT") == "DEFAULT") {
+                    val editor: SharedPreferences.Editor = sharedPreferences.edit()
                     editor.clear()
                     editor.remove("access_token")
                     editor.apply()
@@ -112,7 +112,7 @@ class DashBoard : AppCompatActivity() {
                     val intent = Intent(applicationContext, LoginActivity::class.java)
                     startActivity(intent)
                 } else {
-                    val editor: SharedPreferences.Editor = sharedpreferences.edit()
+                    val editor: SharedPreferences.Editor = sharedPreferences.edit()
                     editor.clear()
                     editor.remove("access_token_rm")
                     editor.apply()

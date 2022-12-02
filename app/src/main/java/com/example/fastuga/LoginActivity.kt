@@ -100,9 +100,9 @@ class LoginActivity : AppCompatActivity() {
                 //verify if remember was checked
                 val accessToken = response.getString("access_token")
                 if (rememberCheckBox.isChecked) {
-                    val sharedpreferences =
+                    val sharedPreferences =
                         applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-                    val editor: SharedPreferences.Editor = sharedpreferences.edit()
+                    val editor: SharedPreferences.Editor = sharedPreferences.edit()
                     //get auth access_token and save to shared preferences
                     editor.putString("access_token_rm", accessToken)
                     editor.apply();
