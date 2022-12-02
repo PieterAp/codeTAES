@@ -21,7 +21,6 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.navigation.NavigationView
 
-
 class DashBoard : AppCompatActivity() {
     private lateinit var requestQueue: RequestQueue
 
@@ -87,15 +86,14 @@ class DashBoard : AppCompatActivity() {
 
     private fun logoutUser() {
         val url = "http://10.0.2.2/api/auth/logout"
-        var accessToken = "";
+        var accessToken: String
 
         //retrieve token from shared preferences
         val sharedpreferences =
             applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
 
-        if (intent.hasExtra("access_token")) {
-            accessToken = intent.getStringExtra("access_token")!!
-        } else {
+        accessToken = sharedpreferences.getString("access_token_rm", "DEFAULT")!!
+        if (accessToken=="DEFAULT") {
             accessToken = sharedpreferences.getString("access_token", "DEFAULT")!!
         }
 
@@ -104,16 +102,22 @@ class DashBoard : AppCompatActivity() {
             Response.Listener
             { response ->
                 //remove token from shared preferences
-                if (intent.hasExtra("access_token")) {
+                if (sharedpreferences.getString("access_token_rm", "DEFAULT")=="DEFAULT") {
+                    val editor: SharedPreferences.Editor = sharedpreferences.edit()
+                    editor.clear()
+                    editor.remove("access_token")
+                    editor.apply()
+
                     //go to login
                     val intent = Intent(applicationContext, LoginActivity::class.java)
                     startActivity(intent)
                 } else {
                     val editor: SharedPreferences.Editor = sharedpreferences.edit()
                     editor.clear()
-                    editor.remove("access_token")
-                    editor.apply();
+                    editor.remove("access_token_rm")
+                    editor.apply()
 
+                    //go to login
                     val intent = Intent(applicationContext, LoginActivity::class.java)
                     startActivity(intent)
                 }
