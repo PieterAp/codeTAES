@@ -201,14 +201,16 @@
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/tvODAcceptOrder"
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnODAcceptOrder"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="@color/black"
+            android:background="#198754"
             android:text="Accept order">
 
-        </Button>
+        </androidx.appcompat.widget.AppCompatButton>
 
     </LinearLayout>
 

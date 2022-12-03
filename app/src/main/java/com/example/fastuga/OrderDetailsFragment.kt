@@ -1,5 +1,6 @@
 package com.example.fastuga
 
+import android.R.attr
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Address
@@ -11,15 +12,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.android.volley.AuthFailureError
-import com.android.volley.DefaultRetryPolicy
-import com.android.volley.RequestQueue
-import com.android.volley.Response
+import com.android.volley.*
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.gms.maps.model.LatLng
+import org.json.JSONException
 import org.json.JSONObject
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
@@ -32,8 +34,8 @@ import org.osmdroid.views.overlay.Polyline
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.pow
 import kotlin.math.roundToInt
+
 
 private lateinit var tvODCustomerName: TextView
 private lateinit var tvODOrderTime: TextView
@@ -43,6 +45,7 @@ private lateinit var tvODProfit: TextView
 private lateinit var tvODDistance: TextView
 private lateinit var tvODTimeLeft: TextView
 private lateinit var map: MapView
+private lateinit var acceptOrderBtn: Button
 private const val TAG = "OsmActivity"
 
 class OrderDetailsFragment : Fragment() {
@@ -67,6 +70,12 @@ class OrderDetailsFragment : Fragment() {
         tvODDistance = rootView.findViewById<View>(R.id.tvODDistance) as TextView
         tvODTimeLeft = rootView.findViewById<View>(R.id.tvODTimeLeft) as TextView
         map = rootView.findViewById(R.id.map)
+        acceptOrderBtn = rootView.findViewById(R.id.btnODAcceptOrder)
+
+        acceptOrderBtn.setOnClickListener(View.OnClickListener {
+            activeOrder(arguments!!.getInt("orderID"))
+        })
+
         return rootView
     }
 
@@ -298,6 +307,48 @@ class OrderDetailsFragment : Fragment() {
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
         map.overlays.add(roadOverlay)
         //endregion
+    }
+
+    private fun activeOrder(orderID: Int) {
+        val url = "http://10.0.2.2/api/orders/$orderID"
+        requestQueue = Volley.newRequestQueue(context)
+        var accessToken: String
+
+        val obj = JSONObject()
+        obj.put("status", "D")
+        obj.put("delivered_by", orderID)
+
+        accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            .getString("access_token_rm", "DEFAULT")!!
+        if (accessToken == "DEFAULT") {
+            accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                .getString("access_token", "DEFAULT")!!
+        }
+
+        val jsonObjectRequest: JsonObjectRequest = object : JsonObjectRequest(
+            Method.PUT, url,
+            obj, Response.Listener {
+                //TODO IMPLEMENT NOTIFICATION
+                Toast.makeText(context, "Order accepted for delivery", Toast.LENGTH_SHORT).show();
+            }, Response.ErrorListener { error ->
+                //TODO ERROR TREATMENT
+                error.networkResponse
+            }) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val params: HashMap<String, String> = HashMap()
+                params["Authorization"] =
+                    "Bearer $accessToken"
+                params["Content-Type"] = "application/json"
+                return params
+            }
+        }
+        //region timeout policy
+        jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
+            30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
+        //endregion
+        requestQueue.add(jsonObjectRequest)
     }
 
 }
