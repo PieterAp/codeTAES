@@ -43,7 +43,10 @@ class EditProfileFragment : Fragment() {
 
         requestQueue = Volley.newRequestQueue(context)
         val sharedpreferences = context?.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-        access_token = sharedpreferences?.getString("access_token","DEFAULT")!!
+        access_token = sharedpreferences!!.getString("access_token_rm", "DEFAULT")!!
+        if (access_token == "DEFAULT") {
+            access_token = sharedpreferences.getString("access_token", "DEFAULT")!!
+        }
     }
 
     //graphical initialization
