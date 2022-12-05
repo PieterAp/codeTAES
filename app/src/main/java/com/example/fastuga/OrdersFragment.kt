@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.android.volley.AuthFailureError
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.RequestQueue
@@ -18,12 +19,17 @@ import com.android.volley.toolbox.Volley
 import org.json.JSONException
 import org.json.JSONObject
 import java.lang.Double
-
+import kotlin.Array
+import kotlin.NumberFormatException
+import kotlin.String
+import kotlin.Throws
 
 class OrdersFragment : Fragment() {
 
     private lateinit var requestQueue: RequestQueue
     private lateinit var tvLoadingOrders: TextView
+    private lateinit var pullToRefresh: SwipeRefreshLayout
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +43,12 @@ class OrdersFragment : Fragment() {
         // Inflate the layout for this fragment
         val rootView: View = inflater.inflate(R.layout.fragment_orders, container, false)
         this.tvLoadingOrders = rootView.findViewById<View>(R.id.tvLoadingOrders) as TextView
+        this.pullToRefresh = rootView.findViewById<View>(R.id.pullToRefresh) as SwipeRefreshLayout
+        pullToRefresh.setOnRefreshListener {
+            tvLoadingOrders.text = "Loading Orders ..."
+            getOrders()
+            pullToRefresh.isRefreshing = false
+        }
         return rootView
     }
 
@@ -95,7 +107,7 @@ class OrdersFragment : Fragment() {
                     recyclerView.adapter = adapter
 
                 } catch (e: JSONException) {
-                    e.printStackTrace()
+                    tvLoadingOrders.text = "No orders to show"
                 }
             }, Response.ErrorListener {
                 tvLoadingOrders.text = "No orders to show"
@@ -112,9 +124,7 @@ class OrdersFragment : Fragment() {
                 //endregion
             }
         //region timeout policy
-        jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
-            30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
+
         //endregion
         requestQueue.add(jsonObjectRequest)
     }
