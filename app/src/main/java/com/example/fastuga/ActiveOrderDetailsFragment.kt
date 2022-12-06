@@ -1,6 +1,6 @@
 package com.example.fastuga
 
-import android.R.attr
+import android.app.ActionBar
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Address
@@ -12,18 +12,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
-import com.android.volley.*
-import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.AuthFailureError
+import com.android.volley.DefaultRetryPolicy
+import com.android.volley.RequestQueue
+import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.gms.maps.model.LatLng
-import org.json.JSONException
 import org.json.JSONObject
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
@@ -33,24 +31,17 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import java.text.ParseException
-import java.text.SimpleDateFormat
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.*
-import kotlin.math.roundToInt
 
-
-private lateinit var tvODCustomerName: TextView
-private lateinit var tvODOrderTime: TextView
-private lateinit var tvODPickupAddress: TextView
-private lateinit var tvODDeliveryAddress: TextView
-private lateinit var tvODProfit: TextView
-private lateinit var tvODDistance: TextView
-private lateinit var tvODTimeLeft: TextView
 private lateinit var map: MapView
-private lateinit var acceptOrderBtn: Button
 private const val TAG = "OsmActivity"
+private lateinit var tvAOPickupAddress: TextView
+private lateinit var tvAODeliveryAddress: TextView
 
-class OrderDetailsFragment : Fragment() {
+class ActiveOrderDetailsFragment : Fragment() {
+
     private lateinit var requestQueue: RequestQueue
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,21 +54,12 @@ class OrderDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        val rootView: View = inflater.inflate(R.layout.fragment_order_details, container, false)
-        tvODCustomerName = rootView.findViewById<View>(R.id.tvODCustomerName) as TextView
-        tvODOrderTime = rootView.findViewById<View>(R.id.tvODOrderTime) as TextView
-        tvODPickupAddress = rootView.findViewById<View>(R.id.tvODPickupAddress) as TextView
-        tvODDeliveryAddress = rootView.findViewById<View>(R.id.tvODDeliveryAddress) as TextView
-        tvODProfit = rootView.findViewById<View>(R.id.tvODProfit) as TextView
-        tvODDistance = rootView.findViewById<View>(R.id.tvODDistance) as TextView
-        tvODTimeLeft = rootView.findViewById<View>(R.id.tvODTimeLeft) as TextView
+        (activity as AppCompatActivity).supportActionBar?.title = "Active Order Details"
+        val rootView: View =
+            inflater.inflate(R.layout.fragment_active_order_details, container, false)
+        tvAOPickupAddress = rootView.findViewById<View>(R.id.tvAOPickupAddress) as TextView
+        tvAODeliveryAddress = rootView.findViewById<View>(R.id.tvAODeliveryAddress) as TextView
         map = rootView.findViewById(R.id.map)
-        acceptOrderBtn = rootView.findViewById(R.id.btnODAcceptOrder)
-
-        acceptOrderBtn.setOnClickListener(View.OnClickListener {
-            activeOrder(arguments!!.getInt("orderID"))
-        })
-
         return rootView
     }
 
@@ -101,40 +83,9 @@ class OrderDetailsFragment : Fragment() {
                 //region data map to textview
                 val ordersJson = JSONObject(response)
                 val order = ordersJson.getJSONObject("data")
-                tvODCustomerName.text = order.getString("customer_name")
-
-                //region time calculation
-                var stuff = order.getString("created_at").replace(" UTC", "")
-                stuff = stuff.replace("T", " ")
-                stuff = stuff.replace(".000000Z", "")
-
-                val sdf = SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss", Locale.getDefault())
-                var diff: Long = 0
-                try {
-                    val currentTime = Calendar.getInstance().time
-                    diff = currentTime.time - sdf.parse(stuff)!!.time
-                } catch (e: ParseException) {
-                    e.printStackTrace()
-                }
-                val seconds = diff / 1000
-                val minutes = seconds / 60
-                val hours = minutes / 60
-                days = (hours.toInt() / 24)
-
-                if (minutes in 1..60) {
-                    tvODOrderTime.text = "$minutes minutes ago"
-                } else if (hours in 1..24) {
-                    tvODOrderTime.text = "$hours hours ago"
-                } else if (days >= 1) {
-                    tvODOrderTime.text = "$days days ago"
-                } else if (seconds >= 1) {
-                    tvODOrderTime.text = "$seconds seconds ago"
-                } else {
-                    tvODOrderTime.text = "just now"
-                }
                 //endregion
-                tvODPickupAddress.text = order.getString("pickup_address")
-                tvODDeliveryAddress.text = order.getString("delivery_address")
+                tvAOPickupAddress.text = order.getString("pickup_address")
+                tvAODeliveryAddress.text = order.getString("delivery_address")
 
                 //region route map load
                 if (order.getString("pickup_address") != "null" && order.getString("delivery_address") != "null") {
@@ -144,28 +95,6 @@ class OrderDetailsFragment : Fragment() {
                         order.getString("delivery_address")
                     )
                 }
-                //endregion
-
-                //region profit calculation
-                if (tvODProfit.text == "loading ...") {
-                    if (order.getString("delivery_distance") == "null") {
-                        tvODProfit.text = "can't be calculated"
-                    } else {
-                        when (order.getString("delivery_distance").toDouble()) {
-                            in 3.1..10.0 -> {
-                                tvODProfit.text = "3"
-                            }
-                            in 0.0..3.0 -> {
-                                tvODProfit.text = "2"
-                            }
-                            else -> {
-                                tvODProfit.text = "4"
-                            }
-                        }
-                    }
-                }
-
-                //endregion
 
                 //endregion
             }, Response.ErrorListener { error ->
@@ -235,6 +164,7 @@ class OrderDetailsFragment : Fragment() {
     }
 
     private fun loadMap(context: Context?, pickupAddress: String, deliveryAddress: String) {
+        //region map config
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
         Configuration.getInstance().userAgentValue = "MyOwnUserAgent/1.0";
@@ -243,12 +173,11 @@ class OrderDetailsFragment : Fragment() {
             isStoragePermissionGranted()
         }
 
-        map.setMultiTouchControls(false)
+        map.setMultiTouchControls(true)
         val waypoints = ArrayList<GeoPoint>()
         //endregion
 
         //region addresses config
-        //CONVERTS ADDRESS TO COORDINATES
         val startLatLng = getLocationFromAddress(
             context,
             pickupAddress
@@ -296,82 +225,78 @@ class OrderDetailsFragment : Fragment() {
 
         //region MAKES THE ROUTE TRACE
         val road: Road = roadManager.getRoad(waypoints)
-        tvODTimeLeft.text = (road.mDuration / 60).toInt().toString() + " min"
 
         if (road.mLength != 0.0) {
-            map.setScrollableAreaLimitDouble(road.mBoundingBox)
+            //map.setScrollableAreaLimitDouble(road.mBoundingBox)
             map.zoomToBoundingBox(road.mBoundingBox, true, 275)
-            map.controller.zoomOut()
         } else {
             val center = GeoPoint(startPoint.latitude, startPoint.longitude)
             map.controller.animateTo(center)
             map.controller.setZoom(21.0)
         }
 
-        tvODDistance.text = ((road.mLength * 10.0).roundToInt() / 10.0).toString() + " km"
-
-        when (road.mLength) {
-            in 3.1..10.0 -> {
-                tvODProfit.text = "3"
-            }
-            in 0.0..3.0 -> {
-                tvODProfit.text = "2"
-            }
-            else -> {
-                tvODProfit.text = "4"
-            }
-        }
-
-
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
         map.overlays.add(roadOverlay)
         //endregion
-    }
 
-    private fun activeOrder(orderID: Int) {
-        val url = "http://10.0.2.2/api/orders/$orderID"
-        requestQueue = Volley.newRequestQueue(context)
-        var accessToken: String
+        //region ADD CURRENT LOCATION OVERLAY (needs location to appear)
+        val gpsMyLocationProvider = GpsMyLocationProvider(context)
+        gpsMyLocationProvider.locationUpdateMinDistance =
+            100f // [m]  // Set the minimum distance for location updates
 
-        val obj = JSONObject()
-        obj.put("delivered_by", orderID)
+        gpsMyLocationProvider.locationUpdateMinTime =
+            10000 // [ms] // Set the minimum time interval for location updates
 
-        accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-            .getString("access_token_rm", "DEFAULT")!!
-        if (accessToken == "DEFAULT") {
-            accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
-                .getString("access_token", "DEFAULT")!!
-        }
-
-        val jsonObjectRequest: JsonObjectRequest = object : JsonObjectRequest(
-            Method.PUT, url,
-            obj, Response.Listener {
-                val bundle = Bundle()
-                bundle.putInt("orderID", orderID)
-                val myFragment: Fragment = ActiveOrderDetailsFragment()
-                myFragment.arguments = bundle
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-                transaction.replace(R.id.fragment_container, myFragment)
-                transaction.addToBackStack(null)
-                transaction.commit()
-            }, Response.ErrorListener { error ->
-                error.networkResponse
-            }) {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val params: HashMap<String, String> = HashMap()
-                params["Authorization"] =
-                    "Bearer $accessToken"
-                params["Content-Type"] = "application/json"
-                return params
-            }
-        }
-        //region timeout policy
-        jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
-            30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        )
+        val mMyLocationOverlay = MyLocationNewOverlay(gpsMyLocationProvider, map)
+        mMyLocationOverlay.isDrawAccuracyEnabled = true
+        mMyLocationOverlay.enableMyLocation()
+        map.overlays.add(mMyLocationOverlay)
         //endregion
-        requestQueue.add(jsonObjectRequest)
+
+        //region DIRECTION NODES
+        (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
+        val nodeIcon = resources.getDrawable(R.drawable.marker_node, context.theme)
+        for (i in road.mNodes.indices) {
+            val node = road.mNodes[i]
+            val nodeMarker = Marker(map)
+            nodeMarker.position = node.mLocation
+            nodeMarker.icon = nodeIcon
+            nodeMarker.title = "Step $i"
+            nodeMarker.snippet = node.mInstructions
+            nodeMarker.subDescription =
+                Road.getLengthDurationText(context, node.mLength, node.mManeuverType.toDouble())
+
+            when (node.mManeuverType) {
+                0 -> nodeMarker.image = resources.getDrawable(R.drawable.ic_continue, context.theme)
+                2 -> nodeMarker.image = resources.getDrawable(R.drawable.ic_continue, context.theme)
+
+                4 -> nodeMarker.image =
+                    resources.getDrawable(R.drawable.ic_turn_left, context.theme)
+                5 -> nodeMarker.image =
+                    resources.getDrawable(R.drawable.ic_turn_left, context.theme)
+
+                6 -> nodeMarker.image =
+                    resources.getDrawable(R.drawable.ic_turn_right, context.theme)
+                7 -> nodeMarker.image =
+                    resources.getDrawable(R.drawable.ic_turn_right, context.theme)
+
+                20 -> nodeMarker.image =
+                    resources.getDrawable(R.drawable.ic_continue, context.theme)
+                21 -> nodeMarker.image =
+                    resources.getDrawable(R.drawable.ic_continue, context.theme)
+
+                24 -> nodeMarker.image = resources.getDrawable(R.drawable.ic_arrived, context.theme)
+
+                /* first exit */ 27 -> nodeMarker.image =
+                resources.getDrawable(R.drawable.rotunda_primeira_trans_65x65, context.theme)
+                /* second exit */ 28 -> nodeMarker.image =
+                resources.getDrawable(R.drawable.rotunda_segunda_trans_65x65, context.theme)
+                /* third exit */ 29 -> nodeMarker.image =
+                resources.getDrawable(R.drawable.rotunda_terceira_trans_65x65, context.theme)
+            }
+            map.overlays.add(nodeMarker)
+        }
+        //endregion
     }
 
 }

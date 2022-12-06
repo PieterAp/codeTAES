@@ -2,14 +2,13 @@ package com.example.fastuga
 
 import android.content.Context
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.android.volley.AuthFailureError
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.RequestQueue
@@ -19,41 +18,29 @@ import com.android.volley.toolbox.Volley
 import org.json.JSONException
 import org.json.JSONObject
 import java.lang.Double
-import kotlin.Array
-import kotlin.NumberFormatException
-import kotlin.String
-import kotlin.Throws
 
-class OrdersFragment : Fragment() {
+
+class ActiveOrders : Fragment() {
 
     private lateinit var requestQueue: RequestQueue
-    private lateinit var tvLoadingOrders: TextView
-    private lateinit var pullToRefresh: SwipeRefreshLayout
-
+    private lateinit var tvAOLoadingOrders: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getOrders()
+        getActiveOrders()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
-        val rootView: View = inflater.inflate(R.layout.fragment_orders, container, false)
-        this.tvLoadingOrders = rootView.findViewById<View>(R.id.tvLoadingOrders) as TextView
-        this.pullToRefresh = rootView.findViewById<View>(R.id.pullToRefresh) as SwipeRefreshLayout
-        pullToRefresh.setOnRefreshListener {
-            tvLoadingOrders.text = "Loading Orders ..."
-            getOrders()
-            pullToRefresh.isRefreshing = false
-        }
+        val rootView: View = inflater.inflate(R.layout.fragment_active_orders, container, false)
+        this.tvAOLoadingOrders = rootView.findViewById<View>(R.id.tvAOLoadingOrders) as TextView
         return rootView
     }
 
-    private fun getOrders() {
-        val url = "http://10.0.2.2/api/drivers/orders"
+    private fun getActiveOrders() {
+        val url = "http://10.0.2.2/api/users/orders"
         var order: JSONObject
 
         requestQueue = Volley.newRequestQueue(context)
@@ -76,7 +63,7 @@ class OrdersFragment : Fragment() {
 
                     val myOderData = Array(array.length()) { OrderModel() }
                     if (myOderData.isEmpty()) {
-                        tvLoadingOrders.text = "No orders to show"
+                        tvAOLoadingOrders.text = "No active orders to show"
                     } else {
                         for (i in 0 until array.length()) {
                             order = array.getJSONObject(i)
@@ -96,21 +83,21 @@ class OrdersFragment : Fragment() {
                                 distance
                             )
 
-                            tvLoadingOrders.visibility = View.GONE
+                            tvAOLoadingOrders.visibility = View.GONE
                         }
                     }
 
-                    val recyclerView = view!!.findViewById<RecyclerView>(R.id.rvOrders)
-                    val adapter = OrderAdapter(myOderData)
+                    val recyclerView = view!!.findViewById<RecyclerView>(R.id.rvActiveOrders)
+                    val adapter = ActiveOrderAdapter(myOderData)
                     recyclerView.setHasFixedSize(true)
                     recyclerView.layoutManager = LinearLayoutManager(context)
                     recyclerView.adapter = adapter
 
                 } catch (e: JSONException) {
-                    tvLoadingOrders.text = "No orders to show"
+                    tvAOLoadingOrders.text = "No active orders to show"
                 }
             }, Response.ErrorListener {
-                tvLoadingOrders.text = "No orders to show"
+                tvAOLoadingOrders.text = "No active orders to show"
             }) {
                 //region header config
                 @Throws(AuthFailureError::class)
@@ -124,7 +111,9 @@ class OrdersFragment : Fragment() {
                 //endregion
             }
         //region timeout policy
-
+        jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
+            30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
         //endregion
         requestQueue.add(jsonObjectRequest)
     }

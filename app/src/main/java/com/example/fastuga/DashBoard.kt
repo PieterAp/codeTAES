@@ -82,7 +82,7 @@ class DashBoard : AppCompatActivity() {
             supportActionBar!!.title = "Active Order"
             val fragmentManager: FragmentManager = supportFragmentManager
             val transaction: FragmentTransaction = fragmentManager.beginTransaction()
-            transaction.replace(R.id.fragment_container, ActiveOrderFragment())
+            transaction.replace(R.id.fragment_container, ActiveOrders())
             transaction.addToBackStack(null)
             transaction.commit()
             drawer.close()
