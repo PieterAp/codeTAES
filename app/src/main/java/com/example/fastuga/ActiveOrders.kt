@@ -2,11 +2,11 @@ package com.example.fastuga
 
 import android.content.Context
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.AuthFailureError
@@ -20,28 +20,27 @@ import org.json.JSONObject
 import java.lang.Double
 
 
-class OrdersFragment : Fragment() {
+class ActiveOrders : Fragment() {
 
     private lateinit var requestQueue: RequestQueue
-    private lateinit var tvLoadingOrders: TextView
+    private lateinit var tvAOLoadingOrders: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getOrders()
+        getActiveOrders()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
-        val rootView: View = inflater.inflate(R.layout.fragment_orders, container, false)
-        this.tvLoadingOrders = rootView.findViewById<View>(R.id.tvLoadingOrders) as TextView
+        val rootView: View = inflater.inflate(R.layout.fragment_active_orders, container, false)
+        this.tvAOLoadingOrders = rootView.findViewById<View>(R.id.tvAOLoadingOrders) as TextView
         return rootView
     }
 
-    private fun getOrders() {
-        val url = "http://10.0.2.2/api/drivers/orders"
+    private fun getActiveOrders() {
+        val url = "http://10.0.2.2/api/users/orders"
         var order: JSONObject
 
         requestQueue = Volley.newRequestQueue(context)
@@ -64,7 +63,7 @@ class OrdersFragment : Fragment() {
 
                     val myOderData = Array(array.length()) { OrderModel() }
                     if (myOderData.isEmpty()) {
-                        tvLoadingOrders.text = "No orders to show"
+                        tvAOLoadingOrders.text = "No orders to show"
                     } else {
                         for (i in 0 until array.length()) {
                             order = array.getJSONObject(i)
@@ -84,12 +83,12 @@ class OrdersFragment : Fragment() {
                                 distance
                             )
 
-                            tvLoadingOrders.visibility = View.GONE
+                            tvAOLoadingOrders.visibility = View.GONE
                         }
                     }
 
-                    val recyclerView = view!!.findViewById<RecyclerView>(R.id.rvOrders)
-                    val adapter = OrderAdapter(myOderData)
+                    val recyclerView = view!!.findViewById<RecyclerView>(R.id.rvActiveOrders)
+                    val adapter = ActiveOrderAdapter(myOderData)
                     recyclerView.setHasFixedSize(true)
                     recyclerView.layoutManager = LinearLayoutManager(context)
                     recyclerView.adapter = adapter
@@ -98,7 +97,7 @@ class OrdersFragment : Fragment() {
                     e.printStackTrace()
                 }
             }, Response.ErrorListener {
-                tvLoadingOrders.text = "No orders to show"
+                tvAOLoadingOrders.text = "No orders to show"
             }) {
                 //region header config
                 @Throws(AuthFailureError::class)

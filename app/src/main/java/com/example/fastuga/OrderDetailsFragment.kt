@@ -16,6 +16,8 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
@@ -135,26 +137,30 @@ class OrderDetailsFragment : Fragment() {
                 tvODDeliveryAddress.text = order.getString("delivery_address")
 
                 //region route map load
-                loadMap(
-                    context,
-                    order.getString("pickup_address"),
-                    order.getString("delivery_address")
-                )
+                if (order.getString("pickup_address") != "null" && order.getString("delivery_address") != "null") {
+                    loadMap(
+                        context,
+                        order.getString("pickup_address"),
+                        order.getString("delivery_address")
+                    )
+                }
                 //endregion
 
                 //region profit calculation
-                if (order.getString("delivery_distance") == "null") {
-                    tvODProfit.text = "can't be calculated"
-                } else {
-                    when (order.getString("delivery_distance").toDouble()) {
-                        in 3.1..10.0 -> {
-                            tvODProfit.text = "3"
-                        }
-                        in 0.0..3.0 -> {
-                            tvODProfit.text = "2"
-                        }
-                        else -> {
-                            tvODProfit.text = "4"
+                if (tvODProfit.text == "loading ...") {
+                    if (order.getString("delivery_distance") == "null") {
+                        tvODProfit.text = "can't be calculated"
+                    } else {
+                        when (order.getString("delivery_distance").toDouble()) {
+                            in 3.1..10.0 -> {
+                                tvODProfit.text = "3"
+                            }
+                            in 0.0..3.0 -> {
+                                tvODProfit.text = "2"
+                            }
+                            else -> {
+                                tvODProfit.text = "4"
+                            }
                         }
                     }
                 }
@@ -304,6 +310,19 @@ class OrderDetailsFragment : Fragment() {
 
         tvODDistance.text = ((road.mLength * 10.0).roundToInt() / 10.0).toString() + " km"
 
+        when (road.mLength) {
+            in 3.1..10.0 -> {
+                tvODProfit.text = "3"
+            }
+            in 0.0..3.0 -> {
+                tvODProfit.text = "2"
+            }
+            else -> {
+                tvODProfit.text = "4"
+            }
+        }
+
+
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
         map.overlays.add(roadOverlay)
         //endregion
@@ -315,7 +334,6 @@ class OrderDetailsFragment : Fragment() {
         var accessToken: String
 
         val obj = JSONObject()
-        obj.put("status", "D")
         obj.put("delivered_by", orderID)
 
         accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -328,10 +346,15 @@ class OrderDetailsFragment : Fragment() {
         val jsonObjectRequest: JsonObjectRequest = object : JsonObjectRequest(
             Method.PUT, url,
             obj, Response.Listener {
-                //TODO IMPLEMENT NOTIFICATION
-                Toast.makeText(context, "Order accepted for delivery", Toast.LENGTH_SHORT).show();
+                val bundle = Bundle()
+                bundle.putInt("orderID", orderID)
+                val myFragment: Fragment = ActiveOrderDetailsFragment()
+                myFragment.arguments = bundle
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+                transaction.replace(R.id.fragment_container, myFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
             }, Response.ErrorListener { error ->
-                //TODO ERROR TREATMENT
                 error.networkResponse
             }) {
             @Throws(AuthFailureError::class)

@@ -38,13 +38,13 @@ private const val TAG = "OsmActivity"
 private lateinit var tvAOPickupAddress: TextView
 private lateinit var tvAODeliveryAddress: TextView
 
-class ActiveOrderFragment : Fragment() {
+class ActiveOrderDetailsFragment : Fragment() {
 
     private lateinit var requestQueue: RequestQueue
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getOrder(11)
+        getOrder(arguments!!.getInt("orderID"))
     }
 
     override fun onCreateView(
@@ -52,7 +52,8 @@ class ActiveOrderFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        val rootView: View = inflater.inflate(R.layout.fragment_active_order, container, false)
+        val rootView: View =
+            inflater.inflate(R.layout.fragment_active_order_details, container, false)
         tvAOPickupAddress = rootView.findViewById<View>(R.id.tvAOPickupAddress) as TextView
         tvAODeliveryAddress = rootView.findViewById<View>(R.id.tvAODeliveryAddress) as TextView
         map = rootView.findViewById(R.id.map)
@@ -84,11 +85,14 @@ class ActiveOrderFragment : Fragment() {
                 tvAODeliveryAddress.text = order.getString("delivery_address")
 
                 //region route map load
-                loadMap(
-                    context,
-                    order.getString("pickup_address"),
-                    order.getString("delivery_address")
-                )
+                if (order.getString("pickup_address") != "null" && order.getString("delivery_address") != "null") {
+                    loadMap(
+                        context,
+                        order.getString("pickup_address"),
+                        order.getString("delivery_address")
+                    )
+                }
+
                 //endregion
             }, Response.ErrorListener { error ->
                 error.networkResponse
@@ -240,7 +244,7 @@ class ActiveOrderFragment : Fragment() {
         gpsMyLocationProvider.locationUpdateMinTime =
             10000 // [ms] // Set the minimum time interval for location updates
 
-        val mMyLocationOverlay = MyLocationNewOverlay(gpsMyLocationProvider,map)
+        val mMyLocationOverlay = MyLocationNewOverlay(gpsMyLocationProvider, map)
         mMyLocationOverlay.isDrawAccuracyEnabled = true
         mMyLocationOverlay.enableMyLocation()
         map.overlays.add(mMyLocationOverlay)
