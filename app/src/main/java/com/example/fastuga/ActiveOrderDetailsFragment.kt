@@ -1,5 +1,6 @@
 package com.example.fastuga
 
+import android.app.ActionBar
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Address
@@ -12,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.android.volley.AuthFailureError
 import com.android.volley.DefaultRetryPolicy
@@ -52,6 +54,7 @@ class ActiveOrderDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
+        (activity as AppCompatActivity).supportActionBar?.title = "Active Order Details"
         val rootView: View =
             inflater.inflate(R.layout.fragment_active_order_details, container, false)
         tvAOPickupAddress = rootView.findViewById<View>(R.id.tvAOPickupAddress) as TextView
