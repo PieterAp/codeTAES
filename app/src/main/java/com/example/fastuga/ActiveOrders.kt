@@ -63,7 +63,7 @@ class ActiveOrders : Fragment() {
 
                     val myOderData = Array(array.length()) { OrderModel() }
                     if (myOderData.isEmpty()) {
-                        tvAOLoadingOrders.text = "No orders to show"
+                        tvAOLoadingOrders.text = "No active orders to show"
                     } else {
                         for (i in 0 until array.length()) {
                             order = array.getJSONObject(i)
@@ -94,10 +94,10 @@ class ActiveOrders : Fragment() {
                     recyclerView.adapter = adapter
 
                 } catch (e: JSONException) {
-                    e.printStackTrace()
+                    tvAOLoadingOrders.text = "No active orders to show"
                 }
             }, Response.ErrorListener {
-                tvAOLoadingOrders.text = "No orders to show"
+                tvAOLoadingOrders.text = "No active orders to show"
             }) {
                 //region header config
                 @Throws(AuthFailureError::class)
