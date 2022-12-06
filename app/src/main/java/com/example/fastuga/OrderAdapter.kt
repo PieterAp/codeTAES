@@ -1,18 +1,20 @@
 package com.example.fastuga
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
 
-class OrderAdapter(val ordersData: Array<OrderModel>) :
+class OrderAdapter(private val ordersData: Array<OrderModel>) :
     RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -27,12 +29,9 @@ class OrderAdapter(val ordersData: Array<OrderModel>) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val myListData = ordersData[position]
-        var days = 0
+        val days: Int
 
-        //region data format
-
-        //region data format
+        //region date format
         var stuff = ordersData[position].orderTime!!.replace(" UTC", "")
         stuff = stuff.replace("T", " ")
         stuff = stuff.replace(".000000Z", "")
@@ -63,19 +62,21 @@ class OrderAdapter(val ordersData: Array<OrderModel>) :
         }
         //endregion
 
-        //endregion
+        //region data format
         if (ordersData[position].customerName != "null") {
             holder.customerName.text = ordersData[position].customerName
         } else {
             holder.customerName.text = ""
         }
-        holder.pickup_address.text = ordersData[position].pickup_address
-        holder.delivery_address.text = ordersData[position].delivery_address
+        holder.pickupAddress.text = ordersData[position].pickup_address
+        holder.deliveryAddress.text = ordersData[position].delivery_address
         holder.ticketNumber.text = "Order #" + ordersData[position].ticketNumber
         holder.profit.text = "" + ordersData[position].profit
         holder.distance.text =
             ((ordersData[position].distance * 10.0).roundToInt() / 10.0).toString() + " km"
+        //endregion
 
+        //region profit calculation
         when (ordersData[position].distance) {
             in 3.1..10.0 -> {
                 holder.profit.text = "3"
@@ -87,22 +88,27 @@ class OrderAdapter(val ordersData: Array<OrderModel>) :
                 holder.profit.text = "4"
             }
         }
+        //endregion
 
-        holder.cardView.setOnClickListener(View.OnClickListener { view ->
-            Toast.makeText(
-                view.context,
-                "click on item: " + myListData.orderId,
-                Toast.LENGTH_LONG
-            ).show()
-        })
+        //region item click
+        holder.cardView.setOnClickListener { view ->
+            val bundle = Bundle()
+            bundle.putInt("orderID", ordersData[position].orderId)
+            val activity = view.context as AppCompatActivity
+            val myFragment: Fragment = OrderDetailsFragment()
+            myFragment.arguments = bundle
+            activity.supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, myFragment).addToBackStack(null).commit()
+        }
+        //endregion
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var orderTime: TextView
         var customerName: TextView
         var ticketNumber: TextView
-        val pickup_address: TextView
-        val delivery_address: TextView
+        val pickupAddress: TextView
+        val deliveryAddress: TextView
         var profit: TextView
         var distance: TextView
         var cardView: CardView
@@ -111,8 +117,8 @@ class OrderAdapter(val ordersData: Array<OrderModel>) :
             orderTime = itemView.findViewById(R.id.tvOrderTime)
             customerName = itemView.findViewById(R.id.tvCustumerName)
             ticketNumber = itemView.findViewById(R.id.tvTicketNumber)
-            pickup_address = itemView.findViewById(R.id.tvPickupAddress)
-            delivery_address = itemView.findViewById(R.id.tvDeliveryAddress)
+            pickupAddress = itemView.findViewById(R.id.tvPickupAddress)
+            deliveryAddress = itemView.findViewById(R.id.tvDeliveryAddress)
             profit = itemView.findViewById(R.id.tvProfit)
             distance = itemView.findViewById(R.id.tvDistance)
             cardView = itemView.findViewById(R.id.cardViewOrder_item)
