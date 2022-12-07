@@ -61,12 +61,26 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:paddingTop="5dp"
             android:layout_weight="1"
             android:orientation="vertical">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:id="@+id/openNav"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="20dp"
+                android:layout_marginEnd="20dp"
+                android:backgroundTint="@color/white"
+                app:borderWidth="0dp"
+                android:layout_gravity="center"
+                app:tint="@null"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_navigation_24" />
 
             <org.osmdroid.views.MapView
                 android:id="@+id/map"
@@ -75,18 +89,7 @@
 
             </org.osmdroid.views.MapView>
 
-        </LinearLayout>
-
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:id="@+id/openNav"
-            android:layout_marginBottom="20dp"
-            android:layout_gravity="end"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:src="@drawable/ic_baseline_navigation_24" />
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

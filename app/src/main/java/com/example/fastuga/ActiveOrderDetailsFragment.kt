@@ -256,20 +256,6 @@ class ActiveOrderDetailsFragment : Fragment() {
         map.overlays.add(roadOverlay)
         //endregion
 
-        //region ADD CURRENT LOCATION OVERLAY (needs location to appear)
-        val gpsMyLocationProvider = GpsMyLocationProvider(context)
-        gpsMyLocationProvider.locationUpdateMinDistance =
-            100f // [m]  // Set the minimum distance for location updates
-
-        gpsMyLocationProvider.locationUpdateMinTime =
-            10000 // [ms] // Set the minimum time interval for location updates
-
-        val mMyLocationOverlay = MyLocationNewOverlay(gpsMyLocationProvider, map)
-        mMyLocationOverlay.isDrawAccuracyEnabled = true
-        mMyLocationOverlay.enableMyLocation()
-        map.overlays.add(mMyLocationOverlay)
-        //endregion
-
         //region DIRECTION NODES
         (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
         val nodeIcon = resources.getDrawable(R.drawable.marker_node, context.theme)
