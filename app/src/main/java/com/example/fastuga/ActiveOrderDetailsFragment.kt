@@ -1,6 +1,5 @@
 package com.example.fastuga
 
-import android.app.ActionBar
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Address
@@ -14,11 +13,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import com.android.volley.AuthFailureError
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.RequestQueue
 import com.android.volley.Response
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.gms.maps.model.LatLng
@@ -43,6 +45,7 @@ private lateinit var tvAODeliveryAddress: TextView
 class ActiveOrderDetailsFragment : Fragment() {
 
     private lateinit var requestQueue: RequestQueue
+    private var profit: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +63,63 @@ class ActiveOrderDetailsFragment : Fragment() {
         tvAOPickupAddress = rootView.findViewById<View>(R.id.tvAOPickupAddress) as TextView
         tvAODeliveryAddress = rootView.findViewById<View>(R.id.tvAODeliveryAddress) as TextView
         map = rootView.findViewById(R.id.map)
+
+        val confirmOrderButton = rootView.findViewById(R.id.btnConfirmOrder) as AppCompatButton
+
+        confirmOrderButton.setOnClickListener {
+            confirmDeliver(arguments!!.getInt("orderID"))
+        }
+
         return rootView
+    }
+
+    private fun confirmDeliver(orderID: Int){
+        val url = "http://10.0.2.2/api/orders/$orderID/confirm"
+        requestQueue = Volley.newRequestQueue(context)
+        var accessToken: String
+
+        val obj = JSONObject()
+        obj.put("status", "D")
+        obj.put("balance", profit)
+
+        accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            .getString("access_token_rm", "DEFAULT")!!
+        if (accessToken == "DEFAULT") {
+            accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                .getString("access_token", "DEFAULT")!!
+        }
+
+        val jsonObjectRequest: JsonObjectRequest = object : JsonObjectRequest(
+            Method.PUT, url,
+            obj, Response.Listener {
+                //send profit to other fragment
+                val bundle = Bundle()
+                bundle.putDouble("profit", profit)
+                val myFragment: Fragment = CompleteOrderFragment()
+                myFragment.arguments = bundle
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+                transaction.replace(R.id.fragment_container, myFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }, Response.ErrorListener { error ->
+                error.networkResponse
+            }) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val params: HashMap<String, String> = HashMap()
+                params["Authorization"] =
+                    "Bearer $accessToken"
+                params["Content-Type"] = "application/json"
+                return params
+            }
+        }
+        //region timeout policy
+        jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
+            30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
+        //endregion
+        requestQueue.add(jsonObjectRequest)
+
     }
 
     private fun getOrder(orderID: Int) {
@@ -233,6 +292,18 @@ class ActiveOrderDetailsFragment : Fragment() {
             val center = GeoPoint(startPoint.latitude, startPoint.longitude)
             map.controller.animateTo(center)
             map.controller.setZoom(21.0)
+        }
+
+        profit = when (road.mLength) {
+            in 3.1..10.0 -> {
+                3.0
+            }
+            in 0.0..3.0 -> {
+                2.0
+            }
+            else -> {
+                4.0
+            }
         }
 
         val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
