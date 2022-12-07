@@ -32,7 +32,7 @@
             android:textColor="@color/black" />
 
     </LinearLayout>
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -71,10 +71,22 @@
             <org.osmdroid.views.MapView
                 android:id="@+id/map"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent" />
+                android:layout_height="fill_parent" >
+
+            </org.osmdroid.views.MapView>
 
         </LinearLayout>
 
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:id="@+id/openNav"
+            android:layout_marginBottom="20dp"
+            android:layout_gravity="end"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:src="@drawable/ic_baseline_navigation_24" />
 
         <LinearLayout
             android:layout_width="match_parent"
