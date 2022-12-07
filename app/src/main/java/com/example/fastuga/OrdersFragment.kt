@@ -37,7 +37,7 @@ class OrdersFragment : Fragment() {
     private lateinit var spinnerDistance: Spinner
     private lateinit var myOderData: Array<OrderModel>
     private lateinit var adapter: OrderAdapter
-
+    private var ordersTag: String = "orderTag"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -176,6 +176,7 @@ class OrdersFragment : Fragment() {
                 //endregion
             }
         //region timeout policy
+        jsonObjectRequest.tag = ordersTag
         jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
             30000,
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
@@ -185,4 +186,8 @@ class OrdersFragment : Fragment() {
         requestQueue.add(jsonObjectRequest)
     }
 
+    override fun onDetach() {
+        super.onDetach()
+        requestQueue.cancelAll(ordersTag)
+    }
 }

@@ -44,6 +44,8 @@ private const val TAG = "OsmActivity"
 private lateinit var tvAOPickupAddress: TextView
 private lateinit var tvAODeliveryAddress: TextView
 private lateinit var openNav: FloatingActionButton
+private var activeOrdersDetailsTag: String = "orderTag"
+
 
 class ActiveOrderDetailsFragment : Fragment() {
 
@@ -128,6 +130,7 @@ class ActiveOrderDetailsFragment : Fragment() {
                 }
                 //endregion
             }
+        jsonObjectRequest.tag = activeOrdersDetailsTag
         //region timeout policy
         jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
             30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
@@ -301,5 +304,11 @@ class ActiveOrderDetailsFragment : Fragment() {
         }
         //endregion
     }
+
+    override fun onDetach() {
+        super.onDetach()
+        requestQueue.cancelAll(activeOrdersDetailsTag)
+    }
+
 
 }

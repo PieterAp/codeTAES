@@ -49,6 +49,8 @@ private lateinit var tvODTimeLeft: TextView
 private lateinit var map: MapView
 private lateinit var acceptOrderBtn: Button
 private const val TAG = "OsmActivity"
+private var orderDetailsTag: String = "orderDetailsTag"
+private var acceptOrderTag: String = "acceptOrderTag"
 
 class OrderDetailsFragment : Fragment() {
     private lateinit var requestQueue: RequestQueue
@@ -182,6 +184,7 @@ class OrderDetailsFragment : Fragment() {
                 }
                 //endregion
             }
+        jsonObjectRequest.tag = orderDetailsTag
         //region timeout policy
         jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
             30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
@@ -366,12 +369,19 @@ class OrderDetailsFragment : Fragment() {
                 return params
             }
         }
+        jsonObjectRequest.tag = acceptOrderTag
         //region timeout policy
         jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
             30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
         )
         //endregion
         requestQueue.add(jsonObjectRequest)
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        requestQueue.cancelAll(orderDetailsTag)
+        requestQueue.cancelAll(acceptOrderTag)
     }
 
 }
