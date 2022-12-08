@@ -1,36 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/pullToRefresh"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="horizontal"
-    tools:context=".DashBoard">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tvLoadingOrders"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Loading Orders ..."
-        android:textAlignment="center" />
-
-    <ScrollView
-        android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:gravity="center"
+        android:orientation="horizontal"
+        tools:context=".DashBoard">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvOrders"
+
+        <TextView
+            android:id="@+id/tvLoadingOrders"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:text="Loading Orders ..."
+            android:textAlignment="center" />
 
-        </androidx.recyclerview.widget.RecyclerView>
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:text="Order by distance"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:background="#FFFFFF"
+                    android:elevation="10dp"
+                    android:padding="5dp">
+
+                    <Spinner
+                        android:id="@+id/spinnerDistance"
+                        style="@style/Widget.AppCompat.DropDownItem.Spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </RelativeLayout>
 
 
-    </ScrollView>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvOrders"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="10dp">
 
-</LinearLayout>
+                </androidx.recyclerview.widget.RecyclerView>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

@@ -14,8 +14,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
 
-class OrderAdapter(private val ordersData: Array<OrderModel>) :
-    RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
+class ActiveOrderAdapter(private val ordersData: Array<OrderModel>) :
+    RecyclerView.Adapter<ActiveOrderAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -95,7 +95,7 @@ class OrderAdapter(private val ordersData: Array<OrderModel>) :
             val bundle = Bundle()
             bundle.putInt("orderID", ordersData[position].orderId)
             val activity = view.context as AppCompatActivity
-            val myFragment: Fragment = OrderDetailsFragment()
+            val myFragment: Fragment = ActiveOrderDetailsFragment()
             myFragment.arguments = bundle
             activity.supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, myFragment).commit()
