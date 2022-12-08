@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CompleteOrderFragment"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="50dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Order has been delivered!"
+        android:gravity="center_horizontal"
+        android:textSize="20dp"/>
+
+    <ImageView
+        android:id="@+id/imgSuccess"
+        android:layout_marginTop="50dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:src="@drawable/complete_success"/>
+
+    <TextView
+        android:id="@+id/txtOrderProfit"
+        android:layout_marginTop="100dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="30dp"
+        android:text="profit: ...€"
+        android:gravity="center"
+        />
+
+    <Button
+        android:layout_marginTop="50dp"
+        android:id="@+id/btnSearchOrders"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Search for more orders"
+        android:layout_gravity="center_horizontal"
+        />
+
+</LinearLayout>
