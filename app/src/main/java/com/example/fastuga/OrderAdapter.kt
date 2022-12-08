@@ -98,7 +98,7 @@ class OrderAdapter(private val ordersData: Array<OrderModel>) :
             val myFragment: Fragment = OrderDetailsFragment()
             myFragment.arguments = bundle
             activity.supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, myFragment).addToBackStack(null).commit()
+                .replace(R.id.fragment_container, myFragment).commit()
         }
         //endregion
     }

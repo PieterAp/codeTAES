@@ -24,11 +24,14 @@ import com.google.android.material.navigation.NavigationView
 class DashBoard : AppCompatActivity() {
     private lateinit var requestQueue: RequestQueue
     private lateinit var profileImageView: ImageView
+    private lateinit var fragmentManager: FragmentManager
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dash_board)
+
+        fragmentManager = supportFragmentManager
 
         val navigationView: NavigationView = findViewById(R.id.nav_view)
         val header: View = navigationView.getHeaderView(0)
@@ -52,7 +55,7 @@ class DashBoard : AppCompatActivity() {
 
         requestQueue = Volley.newRequestQueue(this)
 
-        profileImageView.setOnClickListener{
+        profileImageView.setOnClickListener {
             val intent = Intent(applicationContext, ProfileActivity::class.java)
             startActivity(intent)
             drawer.close()
@@ -61,18 +64,15 @@ class DashBoard : AppCompatActivity() {
         val logoutButton = findViewById<View>(R.id.nav_logout) as TextView
 
         supportActionBar!!.title = "Orders"
-        val fragmentManager: FragmentManager = supportFragmentManager
         val transaction: FragmentTransaction = fragmentManager.beginTransaction()
-        transaction.add(R.id.fragment_container, OrdersFragment())
-        transaction.addToBackStack(null)
+        transaction.replace(R.id.fragment_container, OrdersFragment())
         transaction.commit()
+
 
         navigationView.menu.findItem(R.id.orderListOrders).setOnMenuItemClickListener {
             supportActionBar!!.title = "Orders"
-            val fragmentManager: FragmentManager = supportFragmentManager
             val transaction: FragmentTransaction = fragmentManager.beginTransaction()
             transaction.replace(R.id.fragment_container, OrdersFragment())
-            transaction.addToBackStack(null)
             transaction.commit()
             drawer.close()
             true
@@ -80,10 +80,8 @@ class DashBoard : AppCompatActivity() {
 
         navigationView.menu.findItem(R.id.activeOrder).setOnMenuItemClickListener {
             supportActionBar!!.title = "Active Order"
-            val fragmentManager: FragmentManager = supportFragmentManager
             val transaction: FragmentTransaction = fragmentManager.beginTransaction()
             transaction.replace(R.id.fragment_container, ActiveOrders())
-            transaction.addToBackStack(null)
             transaction.commit()
             drawer.close()
             true

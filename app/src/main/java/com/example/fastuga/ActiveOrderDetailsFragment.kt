@@ -1,9 +1,11 @@
 package com.example.fastuga
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
@@ -11,6 +13,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
@@ -24,6 +27,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.json.JSONObject
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
@@ -41,6 +45,9 @@ private lateinit var map: MapView
 private const val TAG = "OsmActivity"
 private lateinit var tvAOPickupAddress: TextView
 private lateinit var tvAODeliveryAddress: TextView
+private lateinit var openNav: FloatingActionButton
+private var activeOrdersDetailsTag: String = "orderTag"
+
 
 class ActiveOrderDetailsFragment : Fragment() {
 
@@ -69,6 +76,16 @@ class ActiveOrderDetailsFragment : Fragment() {
         confirmOrderButton.setOnClickListener {
             confirmDeliver(arguments!!.getInt("orderID"))
         }
+
+        openNav = rootView.findViewById(R.id.openNav)
+        openNav.setOnClickListener(View.OnClickListener {
+            val gmmIntentUri =
+                Uri.parse("google.navigation:q=" + tvAODeliveryAddress.text)
+            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            mapIntent.setPackage("com.google.android.apps.maps")
+            startActivity(mapIntent)
+        })
+
 
         return rootView
     }
@@ -170,6 +187,7 @@ class ActiveOrderDetailsFragment : Fragment() {
                 }
                 //endregion
             }
+        jsonObjectRequest.tag = activeOrdersDetailsTag
         //region timeout policy
         jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
             30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
@@ -310,20 +328,6 @@ class ActiveOrderDetailsFragment : Fragment() {
         map.overlays.add(roadOverlay)
         //endregion
 
-        //region ADD CURRENT LOCATION OVERLAY (needs location to appear)
-        val gpsMyLocationProvider = GpsMyLocationProvider(context)
-        gpsMyLocationProvider.locationUpdateMinDistance =
-            100f // [m]  // Set the minimum distance for location updates
-
-        gpsMyLocationProvider.locationUpdateMinTime =
-            10000 // [ms] // Set the minimum time interval for location updates
-
-        val mMyLocationOverlay = MyLocationNewOverlay(gpsMyLocationProvider, map)
-        mMyLocationOverlay.isDrawAccuracyEnabled = true
-        mMyLocationOverlay.enableMyLocation()
-        map.overlays.add(mMyLocationOverlay)
-        //endregion
-
         //region DIRECTION NODES
         (roadManager as OSRMRoadManager).setMean(OSRMRoadManager.MEAN_BY_CAR)
         val nodeIcon = resources.getDrawable(R.drawable.marker_node, context.theme)
@@ -369,5 +373,11 @@ class ActiveOrderDetailsFragment : Fragment() {
         }
         //endregion
     }
+
+    override fun onDetach() {
+        super.onDetach()
+        requestQueue.cancelAll(activeOrdersDetailsTag)
+    }
+
 
 }

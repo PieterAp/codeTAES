@@ -32,11 +32,12 @@ class EditProfileFragment : Fragment() {
     private lateinit var textInputLayoutPassword: TextInputLayout
     private lateinit var textInputLayoutName: TextInputLayout
     private lateinit var textInputLayoutLicensePlate: TextInputLayout
-    private lateinit var progressBar: ProgressBar
     private lateinit var progressBarLoad: ProgressBar
     lateinit var layout: ConstraintLayout
     lateinit var access_token: String
     private lateinit var loadEditText: EditText
+    private var profileTag: String = "profileTag"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,10 +82,10 @@ class EditProfileFragment : Fragment() {
         val editButton = view.findViewById<View>(R.id.btnEdit) as Button
 
 
-        editButton.setOnClickListener(View.OnClickListener{
-            if (validateData()){
+        editButton.setOnClickListener(View.OnClickListener {
+            if (validateData()) {
                 editUser()
-                val toast = Toast.makeText(this.context,"Edit with success", Toast.LENGTH_LONG)
+                val toast = Toast.makeText(this.context, "Edit with success", Toast.LENGTH_LONG)
                 toast.view?.setBackgroundColor(Color.parseColor("#198754"))
                 toast.show()
             }
@@ -94,7 +95,7 @@ class EditProfileFragment : Fragment() {
         return view
     }
 
-    private fun editUser(){
+    private fun editUser() {
         val url = "http://10.0.2.2/api/users/profile"
 
 
@@ -103,8 +104,7 @@ class EditProfileFragment : Fragment() {
             Response.Listener
             {
 
-            }, Response.ErrorListener {})
-        {
+            }, Response.ErrorListener {}) {
             override fun getParams(): Map<String, String> {
                 val params: MutableMap<String, String> = HashMap()
                 params["name"] = nameEditText.text.toString()
@@ -112,7 +112,7 @@ class EditProfileFragment : Fragment() {
                 params["email"] = emailEditText.text.toString()
 
                 //says that if has empty body but this works
-                if (passwordEditText.text.isNotEmpty()){
+                if (passwordEditText.text.isNotEmpty()) {
                     params["password"] = passwordEditText.text.toString()
                 }
 
@@ -136,7 +136,7 @@ class EditProfileFragment : Fragment() {
         requestQueue.add(stringRequest)
     }
 
-    private fun getData(){
+    private fun getData() {
         val url = "http://10.0.2.2/api/users/profile"
 
         requestQueue = Volley.newRequestQueue(context)
@@ -181,6 +181,7 @@ class EditProfileFragment : Fragment() {
             }
         }
 
+        stringRequest.tag = profileTag
         stringRequest.retryPolicy = DefaultRetryPolicy(
             30000,
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
@@ -190,7 +191,7 @@ class EditProfileFragment : Fragment() {
 
     }
 
-    private fun validateData() : Boolean{
+    private fun validateData(): Boolean {
 
         textInputLayoutEmail.isErrorEnabled = false
         textInputLayoutPhoneNumber.isErrorEnabled = false
@@ -202,17 +203,18 @@ class EditProfileFragment : Fragment() {
         val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
         val phoneNumberPattern = "^[+]?[0-9]{9,13}\$"
         val namePattern = "^[A-z][\\sA-z]*\$"
-        val licencePlatePattern = "(^(?:[A-Z]{2}-\\d{2}-\\d{2})|(?:\\d{2}-[A-Z]{2}-\\d{2})|(?:\\d{2}-\\d{2}-[A-Z]{2})|(?:[A-Z]{2}-\\d{2}-[A-Z]{2})\$)"
+        val licencePlatePattern =
+            "(^(?:[A-Z]{2}-\\d{2}-\\d{2})|(?:\\d{2}-[A-Z]{2}-\\d{2})|(?:\\d{2}-\\d{2}-[A-Z]{2})|(?:[A-Z]{2}-\\d{2}-[A-Z]{2})\$)"
 
         var validation = true
 
-        if (!nameEditText.text.matches(namePattern.toRegex()) ){
+        if (!nameEditText.text.matches(namePattern.toRegex())) {
             textInputLayoutName.error = "Name is invalid"
             textInputLayoutName.isErrorEnabled = true
             validation = false
         }
 
-        if (!phoneNumberEditText.text.matches(phoneNumberPattern.toRegex())){
+        if (!phoneNumberEditText.text.matches(phoneNumberPattern.toRegex())) {
             textInputLayoutPhoneNumber.error = "Phone Number is invalid"
             textInputLayoutPhoneNumber.isErrorEnabled = true
             validation = false
@@ -226,7 +228,7 @@ class EditProfileFragment : Fragment() {
         }
 
 
-        if (!passwordEditText.text.isEmpty()){
+        if (!passwordEditText.text.isEmpty()) {
             if (passwordEditText.length() < 3) {
                 //CHANGE ERROR PLACE FOR A MORE VISIBLE PLACE
                 textInputLayoutPassword.error = "Password is invalid"
@@ -235,13 +237,18 @@ class EditProfileFragment : Fragment() {
             }
         }
 
-        if (!licensePlateEditText.text.matches(licencePlatePattern.toRegex())){
+        if (!licensePlateEditText.text.matches(licencePlatePattern.toRegex())) {
             textInputLayoutLicensePlate.error = "License Plate is invalid"
             textInputLayoutLicensePlate.isErrorEnabled = true
             validation = false
         }
 
         return validation
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        requestQueue.cancelAll(profileTag)
     }
 
 }

@@ -24,6 +24,7 @@ class ActiveOrders : Fragment() {
 
     private lateinit var requestQueue: RequestQueue
     private lateinit var tvAOLoadingOrders: TextView
+    private var activeOrdersTag: String = "activeOrderTag"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,6 +111,7 @@ class ActiveOrders : Fragment() {
                 }
                 //endregion
             }
+        jsonObjectRequest.tag = activeOrdersTag
         //region timeout policy
         jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
             30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
@@ -118,4 +120,9 @@ class ActiveOrders : Fragment() {
         requestQueue.add(jsonObjectRequest)
     }
 
+
+    override fun onDetach() {
+        super.onDetach()
+        requestQueue.cancelAll(activeOrdersTag)
+    }
 }
