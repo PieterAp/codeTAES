@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -48,6 +49,7 @@ class OrdersFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        (activity as AppCompatActivity).supportActionBar?.title = "Order"
         // Inflate the layout for this fragment
         val rootView: View = inflater.inflate(R.layout.fragment_orders, container, false)
         this.tvLoadingOrders = rootView.findViewById<View>(R.id.tvLoadingOrders) as TextView
