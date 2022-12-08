@@ -49,7 +49,7 @@ class OrdersFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        (activity as AppCompatActivity).supportActionBar?.title = "Order"
+        (activity as AppCompatActivity).supportActionBar?.title = "Orders"
         // Inflate the layout for this fragment
         val rootView: View = inflater.inflate(R.layout.fragment_orders, container, false)
         this.tvLoadingOrders = rootView.findViewById<View>(R.id.tvLoadingOrders) as TextView
