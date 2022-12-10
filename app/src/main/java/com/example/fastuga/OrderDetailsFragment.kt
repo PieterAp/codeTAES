@@ -1,6 +1,5 @@
 package com.example.fastuga
 
-import android.R.attr
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Address
@@ -15,15 +14,14 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.android.volley.*
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.gms.maps.model.LatLng
-import org.json.JSONException
 import org.json.JSONObject
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.Road
@@ -49,6 +47,8 @@ private lateinit var tvODTimeLeft: TextView
 private lateinit var map: MapView
 private lateinit var acceptOrderBtn: Button
 private const val TAG = "OsmActivity"
+private var orderDetailsTag: String = "orderDetailsTag"
+private var acceptOrderTag: String = "acceptOrderTag"
 
 class OrderDetailsFragment : Fragment() {
     private lateinit var requestQueue: RequestQueue
@@ -63,6 +63,7 @@ class OrderDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
+        (activity as AppCompatActivity).supportActionBar?.title = "Order Details"
         val rootView: View = inflater.inflate(R.layout.fragment_order_details, container, false)
         tvODCustomerName = rootView.findViewById<View>(R.id.tvODCustomerName) as TextView
         tvODOrderTime = rootView.findViewById<View>(R.id.tvODOrderTime) as TextView
@@ -182,6 +183,7 @@ class OrderDetailsFragment : Fragment() {
                 }
                 //endregion
             }
+        jsonObjectRequest.tag = orderDetailsTag
         //region timeout policy
         jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
             30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
@@ -355,7 +357,18 @@ class OrderDetailsFragment : Fragment() {
                 transaction.addToBackStack(null)
                 transaction.commit()
             }, Response.ErrorListener { error ->
-                error.networkResponse
+                //Someone took this order
+                val responseBody = String(error.networkResponse.data)
+                val data = JSONObject(responseBody).getString("error")
+                Toast.makeText(
+                    context,
+                    data,
+                    Toast.LENGTH_LONG
+                ).show()
+                val activity = view!!.context as AppCompatActivity
+                val myFragment: Fragment = OrdersFragment()
+                activity.supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, myFragment).commit()
             }) {
             @Throws(AuthFailureError::class)
             override fun getHeaders(): Map<String, String> {
@@ -366,12 +379,19 @@ class OrderDetailsFragment : Fragment() {
                 return params
             }
         }
+        jsonObjectRequest.tag = acceptOrderTag
         //region timeout policy
         jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
             30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
         )
         //endregion
         requestQueue.add(jsonObjectRequest)
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        requestQueue.cancelAll(orderDetailsTag)
+        requestQueue.cancelAll(acceptOrderTag)
     }
 
 }
