@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,6 +31,10 @@ class StatisticsFragment : Fragment() {
 
     var customersArray: ArrayList<String> = ArrayList()
     var customersTotal: Float = 0.0f
+    var deliveriesTotal: Float = 0.0f
+
+    var deliveryTime = 0
+    var orderId = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,14 +46,12 @@ class StatisticsFragment : Fragment() {
         if (access_token == "DEFAULT") {
             access_token = sharedpreferences.getString("access_token", "DEFAULT")!!
         }
+
+        deliveryTime = arguments!!.getInt("delivery_time")
+        orderId = arguments!!.getInt("orderID")
+
         getBalance()
         getCustomer(255)
-
-
-
-
-
-
 
 
     }
@@ -65,23 +66,24 @@ class StatisticsFragment : Fragment() {
         pieChart = view.findViewById(R.id.pie_chart_statistics)
 
         val sharedpreferencesBalance = context?.getSharedPreferences("myBalance", Context.MODE_PRIVATE)
-        balance = sharedpreferencesBalance!!.getString("balanceString","0.0f")!!.toFloat()
+        balance = sharedpreferencesBalance!!.getString("balanceString","")!!.toFloat()
 
         val sharedpreferencesCustomer = context?.getSharedPreferences("myCustomers", Context.MODE_PRIVATE)
         customersTotal = sharedpreferencesCustomer!!.getInt("customer_size",0).toFloat()
+        deliveriesTotal = sharedpreferencesCustomer.getInt("deliveries",0).toFloat()
 
 
-        pieChart(balance, customersTotal)
+        pieChart(balance, customersTotal, deliveriesTotal)
 
 
 
         return view
     }
 
-    private fun pieChart(balance: Float, customers: Float){
+    private fun pieChart(balance: Float, customers: Float, deliveries: Float){
         val list: ArrayList<PieEntry> = ArrayList()
 
-        list.add(PieEntry(10f,"quantity"))
+        list.add(PieEntry(deliveries,"quantity"))
         list.add(PieEntry(10f,"avg time"))
         list.add(PieEntry(10f,"total time"))
         list.add(PieEntry(balance,"balance €"))
@@ -123,6 +125,10 @@ class StatisticsFragment : Fragment() {
                     val mEdit1 = sharedPreferences.edit()
                     mEdit1.putInt("customer_size", customersArray.distinct().size)
                     mEdit1.commit()
+
+                    val deliveries = sharedPreferences.edit()
+                    deliveries.putInt("deliveries", customersArray.size)
+                    deliveries.commit()
 
 
                 } catch (e: JSONException) {
