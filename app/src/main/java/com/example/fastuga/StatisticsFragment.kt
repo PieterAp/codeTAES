@@ -14,6 +14,7 @@ import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.github.mikephil.charting.charts.PieChart
+import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -33,8 +34,10 @@ class StatisticsFragment : Fragment() {
     var customersTotal: Float = 0.0f
     var deliveriesTotal: Float = 0.0f
 
+    var deliveryTimeArray: ArrayList<Int> = ArrayList()
     var deliveryTime = 0
-    var orderId = 0
+    var deliveryTimeTotal = 0.0f
+    var avgTime = 0.0f
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,9 +49,6 @@ class StatisticsFragment : Fragment() {
         if (access_token == "DEFAULT") {
             access_token = sharedpreferences.getString("access_token", "DEFAULT")!!
         }
-
-        deliveryTime = arguments!!.getInt("delivery_time")
-        orderId = arguments!!.getInt("orderID")
 
         getBalance()
         getCustomer(255)
@@ -66,31 +66,45 @@ class StatisticsFragment : Fragment() {
         pieChart = view.findViewById(R.id.pie_chart_statistics)
 
         val sharedpreferencesBalance = context?.getSharedPreferences("myBalance", Context.MODE_PRIVATE)
-        balance = sharedpreferencesBalance!!.getString("balanceString","")!!.toFloat()
+        balance = sharedpreferencesBalance!!.getString("balanceString","0.0f")!!.toFloat()
 
         val sharedpreferencesCustomer = context?.getSharedPreferences("myCustomers", Context.MODE_PRIVATE)
         customersTotal = sharedpreferencesCustomer!!.getInt("customer_size",0).toFloat()
         deliveriesTotal = sharedpreferencesCustomer.getInt("deliveries",0).toFloat()
+        deliveryTimeTotal = sharedpreferencesCustomer.getFloat("totalTime",0f)
+
+        avgTime = deliveryTimeTotal/deliveriesTotal
 
 
-        pieChart(balance, customersTotal, deliveriesTotal)
+        pieChart(balance, customersTotal, deliveriesTotal, deliveryTimeTotal, avgTime)
 
 
 
         return view
     }
 
-    private fun pieChart(balance: Float, customers: Float, deliveries: Float){
+    private fun pieChart(balance: Float, customers: Float, deliveries: Float, totalTime: Float, avg: Float){
         val list: ArrayList<PieEntry> = ArrayList()
 
         list.add(PieEntry(deliveries,"quantity"))
-        list.add(PieEntry(10f,"avg time"))
-        list.add(PieEntry(10f,"total time"))
-        list.add(PieEntry(balance,"balance €"))
+        list.add(PieEntry(avg,"avg time (min)"))
+        list.add(PieEntry(totalTime,"total time (min)"))
+        list.add(PieEntry(balance,"earned €"))
         list.add(PieEntry(customers,"customers"))
 
+        val mColors = ArrayList<Int>()
+
+        ColorTemplate.MATERIAL_COLORS.forEach {
+            mColors.add(it)
+        }
+
+        ColorTemplate.VORDIPLOM_COLORS.forEach {
+            mColors.add(it)
+        }
+
+
         val pieDataSet = PieDataSet(list, "")
-        pieDataSet.setColors(ColorTemplate.PASTEL_COLORS,250)
+        pieDataSet.colors = mColors
         pieDataSet.valueTextSize=15f
         pieDataSet.valueTextColor = Color.BLACK
         pieDataSet.valueTextSize = 20f
@@ -99,8 +113,18 @@ class StatisticsFragment : Fragment() {
         pieChart.data = pieData
         pieChart.centerText = "DELIVERIES"
         pieChart.description.text = ""
+        pieChart.description.textSize = 500f
+        pieChart.setCenterTextSize(20f)
+
+        val l = pieChart.legend
+        l.verticalAlignment = Legend.LegendVerticalAlignment.TOP
+        l.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
+        l.orientation = Legend.LegendOrientation.VERTICAL
+        l.setDrawInside(false)
+        l.textSize = 18f
 
         pieChart.animateY(1500)
+        pieChart.setDrawEntryLabels(false)
     }
 
     private fun getCustomer(userId: Int){
@@ -118,6 +142,7 @@ class StatisticsFragment : Fragment() {
                     for (i in 0 until data.length()) {
                         var jobject = data.getJSONObject(i)
                         customersArray.add(jobject.getString("customer_id"))
+                        deliveryTimeArray.add(jobject.getInt("delivery_time"))
                     }
 
                     val sharedPreferences =
@@ -130,6 +155,13 @@ class StatisticsFragment : Fragment() {
                     deliveries.putInt("deliveries", customersArray.size)
                     deliveries.commit()
 
+                    deliveryTimeArray.forEach {
+                        deliveryTime += it
+                    }
+
+                    val time = sharedPreferences.edit()
+                    time.putFloat("totalTime", deliveryTime.toFloat())
+                    time.commit()
 
                 } catch (e: JSONException) {
                     e.printStackTrace()

@@ -1,10 +1,11 @@
 package com.example.fastuga
 
 import android.content.res.Resources
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.google.android.material.tabs.TabLayoutMediator
 
 class ProfileActivity : AppCompatActivity() {
@@ -15,6 +16,7 @@ class ProfileActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
+        val actionbar = supportActionBar
 
         //get tabs in design
         tabLayout = findViewById(R.id.tabLayout)
@@ -29,12 +31,26 @@ class ProfileActivity : AppCompatActivity() {
         }.attach()
 
         //actionbar
-        val actionbar = supportActionBar
-        //set actionbar title
         actionbar!!.title = "Profile"
+
+        tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                viewPager.currentItem = tab.position
+                if (tab.position == 0){
+                    actionbar.title = "Profile"
+
+                }
+                else{
+                    actionbar.title = "Statistics"
+                }
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab) {}
+            override fun onTabReselected(tab: TabLayout.Tab) {}
+        })
+        
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
-
     }
 
     override fun onSupportNavigateUp(): Boolean {
