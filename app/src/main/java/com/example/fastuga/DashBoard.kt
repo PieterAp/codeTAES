@@ -129,6 +129,14 @@ class DashBoard : AppCompatActivity() {
                     val intent = Intent(applicationContext, LoginActivity::class.java)
                     startActivity(intent)
                 }
+
+                val preferences = getSharedPreferences("myBalance", 0)
+                preferences?.edit()?.remove("balanceString")?.commit()
+
+                val sharedpreferencesCustomer = getSharedPreferences("myCustomers", Context.MODE_PRIVATE)
+                sharedpreferencesCustomer.edit().remove("customer_size").commit()
+                sharedpreferencesCustomer.edit().remove("deliveries").commit()
+                sharedpreferencesCustomer.edit().remove("totalTime").commit()
             },
             Response.ErrorListener
             { error ->

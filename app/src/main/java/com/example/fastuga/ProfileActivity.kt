@@ -48,7 +48,7 @@ class ProfileActivity : AppCompatActivity() {
             override fun onTabUnselected(tab: TabLayout.Tab) {}
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
-        
+
         //set back button
         actionbar.setDisplayHomeAsUpEnabled(true)
     }

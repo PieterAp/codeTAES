@@ -1,13 +1,17 @@
 package com.example.fastuga
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.RequestQueue
 import com.android.volley.Response
@@ -15,9 +19,12 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.github.mikephil.charting.utils.ColorTemplate
 import org.json.JSONException
 import org.json.JSONObject
@@ -25,17 +32,17 @@ import org.json.JSONObject
 
 class StatisticsFragment : Fragment() {
     private lateinit var pieChart: PieChart
-    private var balance: Float = 0.0f
+    private var balance: String = ""
+    private var balanceFloat: Float = 0.0f
+    private lateinit var pullToRefresh: SwipeRefreshLayout
+    private lateinit var loadStatistics: TextView
 
     private lateinit var requestQueue: RequestQueue
     lateinit var access_token: String
 
-    var customersArray: ArrayList<String> = ArrayList()
     var customersTotal: Float = 0.0f
     var deliveriesTotal: Float = 0.0f
 
-    var deliveryTimeArray: ArrayList<Int> = ArrayList()
-    var deliveryTime = 0
     var deliveryTimeTotal = 0.0f
     var avgTime = 0.0f
 
@@ -51,8 +58,7 @@ class StatisticsFragment : Fragment() {
         }
 
         getBalance()
-        getCustomer(255)
-
+        getCustomer(access_token)
 
     }
 
@@ -62,23 +68,42 @@ class StatisticsFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_statistics, container, false)
+        this.pullToRefresh = view.findViewById<View>(R.id.refreshStatistics) as SwipeRefreshLayout
+        loadStatistics = view.findViewById(R.id.load_statistics)
 
         pieChart = view.findViewById(R.id.pie_chart_statistics)
 
         val sharedpreferencesBalance = context?.getSharedPreferences("myBalance", Context.MODE_PRIVATE)
-        balance = sharedpreferencesBalance!!.getString("balanceString","0.0f")!!.toFloat()
+        balance = sharedpreferencesBalance!!.getString("balanceString", 0.0f.toString())!!
+
+
+        if (balance == "null"){
+            balance = "0"
+        }
+
 
         val sharedpreferencesCustomer = context?.getSharedPreferences("myCustomers", Context.MODE_PRIVATE)
         customersTotal = sharedpreferencesCustomer!!.getInt("customer_size",0).toFloat()
-        deliveriesTotal = sharedpreferencesCustomer.getInt("deliveries",0).toFloat()
+        deliveriesTotal = sharedpreferencesCustomer.getFloat("deliveries",0.0f)
         deliveryTimeTotal = sharedpreferencesCustomer.getFloat("totalTime",0f)
 
         avgTime = deliveryTimeTotal/deliveriesTotal
 
 
-        pieChart(balance, customersTotal, deliveriesTotal, deliveryTimeTotal, avgTime)
+        pieChart(balance.toFloat(), customersTotal, deliveriesTotal, deliveryTimeTotal, avgTime)
+        loadStatistics.visibility = View.GONE
+        pieChart.visibility = View.VISIBLE
 
 
+        pullToRefresh.setOnRefreshListener {
+            loadStatistics.visibility = View.VISIBLE
+            loadStatistics.text ="loading"
+            getBalance()
+            getCustomer(access_token)
+            pullToRefresh.isRefreshing = false
+            pieChart(balance.toFloat(), customersTotal, deliveriesTotal, deliveryTimeTotal, avgTime)
+
+        }
 
         return view
     }
@@ -125,11 +150,35 @@ class StatisticsFragment : Fragment() {
 
         pieChart.animateY(1500)
         pieChart.setDrawEntryLabels(false)
+        pieChart.isClickable = true
+
+
+        pieChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+            override fun onValueSelected(e: Entry, h: Highlight) {
+                val i = h.x.toInt()
+                val t = list[i].label
+
+                val builder = AlertDialog.Builder(context)
+                //builder.setTitle("Androidly Alert")
+                builder.setMessage(" $t ")
+                builder.setPositiveButton("OK", DialogInterface.OnClickListener{ dialog, id -> dialog.dismiss()})
+                builder.show()
+
+            }
+
+            override fun onNothingSelected() {}
+        })
+
     }
 
-    private fun getCustomer(userId: Int){
+    private fun getCustomer(userId: String){
         val url = "http://10.0.2.2/api/orders/driver/$userId"
         requestQueue = Volley.newRequestQueue(context)
+        var deliveryTime = 0
+        var deliveryTimeArray: ArrayList<Int> = ArrayList()
+        var customersArray: ArrayList<String> = ArrayList()
+        var quantity: Int
+
 
         val stringRequest = object : StringRequest(
             Method.GET, url,
@@ -151,8 +200,10 @@ class StatisticsFragment : Fragment() {
                     mEdit1.putInt("customer_size", customersArray.distinct().size)
                     mEdit1.commit()
 
+
+                    quantity = customersArray.size
                     val deliveries = sharedPreferences.edit()
-                    deliveries.putInt("deliveries", customersArray.size)
+                    deliveries.putFloat("deliveries", quantity.toFloat())
                     deliveries.commit()
 
                     deliveryTimeArray.forEach {
