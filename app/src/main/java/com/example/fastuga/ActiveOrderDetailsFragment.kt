@@ -47,6 +47,7 @@ private lateinit var tvAOPickupAddress: TextView
 private lateinit var tvAODeliveryAddress: TextView
 private lateinit var openNav: FloatingActionButton
 private var activeOrdersDetailsTag: String = "orderTag"
+private var deliveryTime: Float = 0.0f
 
 
 class ActiveOrderDetailsFragment : Fragment() {
@@ -57,6 +58,9 @@ class ActiveOrderDetailsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         getOrder(arguments!!.getInt("orderID"))
+
+        val sharedpreferences = context?.getSharedPreferences("time", Context.MODE_PRIVATE)
+        deliveryTime = sharedpreferences!!.getFloat("delivery_time",0f)
     }
 
     override fun onCreateView(
@@ -98,6 +102,7 @@ class ActiveOrderDetailsFragment : Fragment() {
         val obj = JSONObject()
         obj.put("status", "D")
         obj.put("balance", profit)
+        obj.put("delivery_time", deliveryTime)
 
         accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
             .getString("access_token_rm", "DEFAULT")!!

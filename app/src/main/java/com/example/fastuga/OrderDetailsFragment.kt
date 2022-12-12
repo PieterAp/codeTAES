@@ -300,6 +300,22 @@ class OrderDetailsFragment : Fragment() {
         val road: Road = roadManager.getRoad(waypoints)
         tvODTimeLeft.text = (road.mDuration / 60).toInt().toString() + " min"
 
+        //save time value to be used in statistics
+        val time = (road.mDuration / 60).toInt().toFloat()
+
+        val bundle = Bundle()
+        bundle.putFloat("deliveryTime", time)
+        val myFragment: Fragment = ActiveOrderDetailsFragment()
+        myFragment.arguments = bundle
+
+
+        val sharedPreferences =
+            context.getSharedPreferences("time", Context.MODE_PRIVATE)
+        val deliveriesTime = sharedPreferences.edit()
+        deliveriesTime.putFloat("delivery_time", time)
+        deliveriesTime.commit()
+
+
         if (road.mLength != 0.0) {
             map.setScrollableAreaLimitDouble(road.mBoundingBox)
             map.zoomToBoundingBox(road.mBoundingBox, true, 275)
