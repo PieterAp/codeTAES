@@ -92,13 +92,27 @@ class ActiveOrderAdapter(private val ordersData: Array<OrderModel>) :
 
         //region item click
         holder.cardView.setOnClickListener { view ->
-            val bundle = Bundle()
-            bundle.putInt("orderID", ordersData[position].orderId)
-            val activity = view.context as AppCompatActivity
-            val myFragment: Fragment = ActiveOrderDetailsFragment()
-            myFragment.arguments = bundle
-            activity.supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, myFragment).commit()
+            val orderId = ordersData[position].orderId
+            val status = ordersData[position].status
+
+            if (status == "P" || status == "R") {
+                val bundle = Bundle()
+                bundle.putInt("orderID", orderId)
+                val activity = view.context as AppCompatActivity
+                val myFragment: Fragment = CookingFragment()
+                myFragment.arguments = bundle
+                activity.supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, myFragment).addToBackStack(null).commit()
+
+            } else if (status == "O") {
+                val bundle = Bundle()
+                bundle.putInt("orderID", orderId)
+                val activity = view.context as AppCompatActivity
+                val myFragment: Fragment = ActiveOrderDetailsFragment()
+                myFragment.arguments = bundle
+                activity.supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, myFragment).addToBackStack(null).commit()
+            }
         }
         //endregion
     }

@@ -350,7 +350,7 @@ class OrderDetailsFragment : Fragment() {
             obj, Response.Listener {
                 val bundle = Bundle()
                 bundle.putInt("orderID", orderID)
-                val myFragment: Fragment = ActiveOrderDetailsFragment()
+                val myFragment: Fragment = CookingFragment()
                 myFragment.arguments = bundle
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
                 transaction.replace(R.id.fragment_container, myFragment)
