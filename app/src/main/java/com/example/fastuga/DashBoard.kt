@@ -21,11 +21,13 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.navigation.NavigationView
 
+
 class DashBoard : AppCompatActivity() {
     private lateinit var requestQueue: RequestQueue
     private lateinit var profileImageView: ImageView
     private lateinit var fragmentManager: FragmentManager
-
+    private lateinit var nameTextView: TextView
+    private lateinit var emailTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +92,23 @@ class DashBoard : AppCompatActivity() {
         logoutButton.setOnClickListener(View.OnClickListener {
             logoutUser()
         })
+
+        val sharedPreferences =
+            applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+        val userName = sharedPreferences.getString("name", "DEFAULT")!!
+        val userEmail = sharedPreferences.getString("email", "DEFAULT")!!
+
+
+
+        nameTextView = header.findViewById(R.id.name)
+        nameTextView.text = userName
+
+        emailTextView = header.findViewById(R.id.email)
+        emailTextView.text = userEmail
+
+
+
     }
 
     private fun logoutUser() {

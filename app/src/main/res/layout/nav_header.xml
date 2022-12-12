@@ -10,15 +10,18 @@
 
     <ImageView
         android:id="@+id/profileImageNav"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@mipmap/ic_launcher_round"/>
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:src="@drawable/fastuga_logo"
+        android:background="@drawable/circle"
+        android:padding="1dp"/>
 
     <TextView
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="8dp"
+        android:paddingTop="10dp"
+        android:paddingHorizontal="8dp"
         android:text="Kartofel"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
@@ -26,7 +29,7 @@
         android:id="@+id/email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="8dp"
+        android:paddingHorizontal="8dp"
         android:text="Kartofel@gmail.com"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 

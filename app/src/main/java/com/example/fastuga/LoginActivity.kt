@@ -99,6 +99,8 @@ class LoginActivity : AppCompatActivity() {
             { response ->
                 //verify if remember was checked
                 val accessToken = response.getString("access_token")
+                val userName = response.getString("name")
+                val userEmail = response.getString("email")
                 if (rememberCheckBox.isChecked) {
                     val sharedPreferences =
                         applicationContext.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
@@ -115,6 +117,8 @@ class LoginActivity : AppCompatActivity() {
                     val editor: SharedPreferences.Editor = sharedpreferences.edit()
                     //get auth access_token and save to shared preferences
                     editor.putString("access_token", accessToken)
+                    editor.putString("name", userName)
+                    editor.putString("email", userEmail)
                     editor.apply();
                     //go to dashboard
                     val intent = Intent(applicationContext, DashBoard::class.java)
