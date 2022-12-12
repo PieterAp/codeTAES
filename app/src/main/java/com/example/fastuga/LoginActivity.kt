@@ -107,6 +107,8 @@ class LoginActivity : AppCompatActivity() {
                     val editor: SharedPreferences.Editor = sharedPreferences.edit()
                     //get auth access_token and save to shared preferences
                     editor.putString("access_token_rm", accessToken)
+                    editor.putString("name", userName)
+                    editor.putString("email", userEmail)
                     editor.apply();
                     //go to dashboard
                     val intent = Intent(applicationContext, DashBoard::class.java)
