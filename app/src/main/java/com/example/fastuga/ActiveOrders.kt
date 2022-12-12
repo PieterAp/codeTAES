@@ -79,6 +79,8 @@ class ActiveOrders : Fragment() {
                                 order.getString("customer_name"),
                                 order.getString("pickup_address"),
                                 order.getString("delivery_address"),
+                                order.getString("delivered_by"),
+                                order.getString("status"),
                                 order.getString("ticket_number").toInt(),
                                 0,
                                 distance
