@@ -1,5 +1,6 @@
 package com.example.fastuga
 
+import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -54,7 +55,9 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
+        val intent = Intent(applicationContext, DashBoard::class.java)
+        startActivity(intent)
+
         return true
     }
 }
