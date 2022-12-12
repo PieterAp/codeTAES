@@ -45,6 +45,7 @@ private lateinit var map: MapView
 private const val TAG = "OsmActivity"
 private lateinit var tvAOPickupAddress: TextView
 private lateinit var tvAODeliveryAddress: TextView
+private lateinit var buttonCancelActive: Button
 private lateinit var openNav: FloatingActionButton
 private var activeOrdersDetailsTag: String = "orderTag"
 
@@ -69,6 +70,7 @@ class ActiveOrderDetailsFragment : Fragment() {
             inflater.inflate(R.layout.fragment_active_order_details, container, false)
         tvAOPickupAddress = rootView.findViewById<View>(R.id.tvAOPickupAddress) as TextView
         tvAODeliveryAddress = rootView.findViewById<View>(R.id.tvAODeliveryAddress) as TextView
+        buttonCancelActive = rootView.findViewById<Button>(R.id.buttonCancelActive) as Button
         map = rootView.findViewById(R.id.map)
 
         val confirmOrderButton = rootView.findViewById(R.id.btnConfirmOrder) as AppCompatButton
@@ -86,8 +88,55 @@ class ActiveOrderDetailsFragment : Fragment() {
             startActivity(mapIntent)
         })
 
+        buttonCancelActive.setOnClickListener(View.OnClickListener {
+            buttonCancelActive(arguments!!.getInt("orderID"))
+        })
 
         return rootView
+    }
+
+    private fun buttonCancelActive(orderID: Int) {
+        val url = "http://10.0.2.2/api/orders/$orderID"
+        requestQueue = Volley.newRequestQueue(context)
+        var accessToken: String
+
+        val obj = JSONObject()
+        obj.put("status", "C")
+
+        accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            .getString("access_token_rm", "DEFAULT")!!
+        if (accessToken == "DEFAULT") {
+            accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                .getString("access_token", "DEFAULT")!!
+        }
+
+        val jsonObjectRequest: JsonObjectRequest = object : JsonObjectRequest(
+            Method.PUT, url,
+            obj, Response.Listener {
+                val myFragment: Fragment = OrdersFragment()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+                transaction.replace(R.id.fragment_container, myFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }, Response.ErrorListener { error ->
+                error.networkResponse
+            }) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val params: HashMap<String, String> = HashMap()
+                params["Authorization"] =
+                    "Bearer $accessToken"
+                params["Content-Type"] = "application/json"
+                return params
+            }
+
+        }
+        //region timeout policy
+        jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
+            30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
+        //endregion
+        requestQueue.add(jsonObjectRequest)
     }
 
     private fun confirmDeliver(orderID: Int){

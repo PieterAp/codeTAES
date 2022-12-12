@@ -31,6 +31,7 @@ import java.util.*
 class CookingFragment : Fragment() {
     private lateinit var requestQueue: RequestQueue
     private lateinit var buttonPickUp: Button
+    private lateinit var buttonCancelPickup: Button
     private lateinit var header_title: TextView
     private lateinit var refreshInst: TextView
     private lateinit var pullToRefreshStatus: SwipeRefreshLayout
@@ -50,6 +51,7 @@ class CookingFragment : Fragment() {
         this.header_title = rootView.findViewById<View>(R.id.header_title) as TextView
         this.refreshInst = rootView.findViewById<View>(R.id.refreshInst) as TextView
         this.buttonPickUp = rootView.findViewById<Button>(R.id.btnPickUpOrder) as Button
+        this.buttonCancelPickup = rootView.findViewById<Button>(R.id.buttonCancelPickup) as Button
         this.pullToRefreshStatus = rootView.findViewById<View>(R.id.pullToRefreshStatus) as SwipeRefreshLayout
         this.orderStatusImageView = rootView.findViewById<ImageView>(R.id.orderStatusImageView) as ImageView
         val orderID = arguments!!.getInt("orderID")
@@ -70,7 +72,55 @@ class CookingFragment : Fragment() {
             orderPickup(orderID)
         })
 
+        buttonCancelPickup.setOnClickListener(View.OnClickListener {
+            cancelOrder(orderID)
+        })
+
         return rootView
+    }
+
+    private fun cancelOrder(orderID: Int) {
+        val url = "http://10.0.2.2/api/orders/$orderID"
+        requestQueue = Volley.newRequestQueue(context)
+        var accessToken: String
+
+        val obj = JSONObject()
+        obj.put("delivered_by", "null")
+
+        accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            .getString("access_token_rm", "DEFAULT")!!
+        if (accessToken == "DEFAULT") {
+            accessToken = this.activity!!.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                .getString("access_token", "DEFAULT")!!
+        }
+
+        val jsonObjectRequest: JsonObjectRequest = object : JsonObjectRequest(
+            Method.PUT, url,
+            obj, Response.Listener {
+                val myFragment: Fragment = OrdersFragment()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+                transaction.replace(R.id.fragment_container, myFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }, Response.ErrorListener { error ->
+                error.networkResponse
+            }) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val params: HashMap<String, String> = HashMap()
+                params["Authorization"] =
+                    "Bearer $accessToken"
+                params["Content-Type"] = "application/json"
+                return params
+            }
+
+        }
+        //region timeout policy
+        jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
+            30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
+        //endregion
+        requestQueue.add(jsonObjectRequest)
     }
 
     private fun orderPickup(orderID: Int) {
