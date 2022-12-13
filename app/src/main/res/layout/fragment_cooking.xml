@@ -68,13 +68,31 @@
                 tools:src="@drawable/cooking"/>
         </LinearLayout>
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnPickUpOrder"
-            style="@style/Widget.AppCompat.Button.Colored"
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="#1034A6"
-            android:text="Pickup order"/>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/buttonCancelPickup"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="0.7"
+                android:background="#d9534f"
+                android:text="Cancel"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnPickUpOrder"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="0.3"
+                android:background="#1034A6"
+                android:text="Pickup order"/>
+
+        </LinearLayout>
 
     </LinearLayout>
     </LinearLayout>
