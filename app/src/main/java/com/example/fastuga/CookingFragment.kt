@@ -10,8 +10,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentTransaction
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.android.volley.AuthFailureError
@@ -23,9 +21,6 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
 import org.json.JSONObject
-import java.io.Console
-import java.text.ParseException
-import java.text.SimpleDateFormat
 import java.util.*
 
 class CookingFragment : Fragment() {

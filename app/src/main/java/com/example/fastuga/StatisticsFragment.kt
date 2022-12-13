@@ -232,6 +232,9 @@ class StatisticsFragment : Fragment() {
                     }
                     loadStatistics.visibility = View.GONE
                     //pieChart.visibility = View.VISIBLE
+                    if (balance == "null") {
+                        balance = "0"
+                    }
 
                     pieChart(
                         balance.toFloat(),
